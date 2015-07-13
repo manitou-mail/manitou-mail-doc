@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<chapter id="manitou-mgr">
+<title>manitou-mgr</title>
+<para>
+manitou-mgr is a script that can perform management tasks,
+monitoring and reporting on a Manitou-Mail database. </para>
+
+<sect1 id="manitou-mgr.create-database">
+<title>Creating a new database</title>
+
+<para>Create a new, empty PostgreSQL database to hold the mail data, and a dedicated database user that owns it. Both are named <literal>manitou</literal> by default.</para>
+<para>
+<cmdsynopsis>
+  <command>manitou-mgr</command>  --create-database
+  <arg>--conf=<replaceable>/path/to/configfile</replaceable></arg>
+  <arg>--quiet</arg>
+<sbr/>
+<arg>--db-name=<replaceable>val</replaceable></arg>
+<arg>--db-user=<replaceable>val</replaceable></arg>
+<arg>--db-host=<replaceable>val</replaceable></arg>
+<arg>--db-port=<replaceable>val</replaceable></arg>
+<sbr/>
+<arg>--db-super-user=<replaceable>val</replaceable></arg>
+<arg>--db-super-password=<replaceable>val</replaceable></arg>
+</cmdsynopsis>
+</para>
+
+<para>
+Options:
+<variablelist>
+ <varlistentry>
+ <term>--conf</term>
+<listitem>Path to manitou-mdx configuration file (default: <filename>/etc/manitou-mdx.conf</filename>)</listitem>
+ </varlistentry>
+ <varlistentry>
+<term>--db-name</term>
+ <listitem>Name of the new database to create (default: <literal>manitou</literal>).</listitem>
+</varlistentry>
+
+ <varlistentry>
+<term>--db-user</term>
+ <listitem>Database user that will own the newly created database (default: <literal>manitou</literal>).</listitem>
+</varlistentry>
+
+ <varlistentry>
+<term>--db-host</term>
+ <listitem>Database host name to connect to. By default, connect to a local database (by Unix socket).</listitem>
+</varlistentry>
+
+ <varlistentry>
+<term>--db-port</term>
+ <listitem>Database port number to connect to (default: 5432).</listitem>
+</varlistentry>
+
+ <varlistentry>
+<term>--db-super-user</term>
+ <listitem>Database superuser to connect to in order to create a new database (default: postgres)
+</listitem>
+</varlistentry>
+
+ <varlistentry>
+<term>--db-super-password</term>
+ <listitem>Password for the database superuser (default: no password).</listitem>
+</varlistentry>
+
+ <varlistentry>
+<term>--quiet</term>
+ <listitem>No output unless an error occurs. The default is to output information messages in addition to error messages.</listitem>
+</varlistentry>
+
+</variablelist>
+</para>
+
+</sect1>
+
+<sect1 id="manitou-mgr.create-schema">
+<title>Creating objects in an existing database</title>
+<para>Create all database objects to hold the mail data (should be applied to an empty database). Generally this is not needed since the --create-database option already creates the database objects.</para>
+
+<para>
+<cmdsynopsis>
+  <command>manitou-mgr</command> --create-schema
+  <arg>--conf=<replaceable>/path/to/configfile</replaceable></arg>
+  <arg>--quiet</arg>
+  <arg>--dry-run</arg>
+<sbr/>
+</cmdsynopsis>
+</para>
+
+<para>
+Options:
+<variablelist>
+ <varlistentry>
+ <term>--conf</term>
+<listitem>Path to manitou-mdx configuration file (default: <filename>/etc/manitou-mdx.conf</filename>)</listitem>
+ </varlistentry>
+
+ <varlistentry>
+<term>--quiet</term>
+ <listitem>No output unless an error occurs. The default is to output information messages in addition to error messages.</listitem>
+</varlistentry>
+
+ <varlistentry>
+<term>--dry-run</term>
+ <listitem>Do not run the SQL commands to create the schema but display them on the standard output.</listitem>
+</varlistentry>
+
+</variablelist>
+</para>
+
+</sect1>
+
+<sect1 id="manitou-mgr.upgrade-schema">
+<title>Upgrading a database schema to a newer version</title>
+
+<para>
+<cmdsynopsis>
+  <command>manitou-mgr</command> --upgrade-schema
+  <arg>--conf=<replaceable>/path/to/configfile</replaceable></arg>
+  <arg>--quiet</arg>
+  <arg>--dry-run</arg>
+<sbr/>
+</cmdsynopsis>
+</para>
+
+<para>
+Options:
+<variablelist>
+ <varlistentry>
+ <term>--conf</term>
+<listitem>Path to manitou-mdx configuration file (default: <filename>/etc/manitou-mdx.conf</filename>)</listitem>
+ </varlistentry>
+
+ <varlistentry>
+<term>--dry-run</term>
+ <listitem>Do not run the SQL commands to upgrade the schema but display them on the standard output.</listitem>
+</varlistentry>
+
+</variablelist>
+</para>
+</sect1>
+
+
+<sect1 id="manitou-mgr.db-admin">
+<title>Database administration commands</title>
+
+<para>
+<cmdsynopsis>
+  <command>manitou-mgr</command>
+  <group choice="req">
+    <arg choice="req">--hash-attachments </arg>
+    <arg choice="req">--merge-attachments </arg>
+  </group>
+  <arg>--conf=<replaceable>/path/to/configfile</replaceable></arg>
+  <arg>--quiet</arg>
+<sbr/>
+</cmdsynopsis>
+</para>
+
+Options:
+<variablelist>
+
+ <varlistentry>
+  <term>--hash-attachments</term>
+  <listitem>Compute and update the fingerprints of the attachments in the
+  database that have no fingerprint. This is done automatically by
+  manitou-mdx during normal import so this option shouldn't be used except for troubleshooting or after an upgrade from a version older than 0.9.9.</listitem>
+</varlistentry>
+
+ <varlistentry>
+  <term>--merge-attachments</term>
+  <listitem>Merge attachments that share the same
+  fingerprint. This is done automatically by
+  manitou-mdx and the user interface so this option shouldn't be used except for troubleshooting or after an upgrade from a version older than 0.9.9.</listitem>
+</varlistentry>
+
+ <varlistentry>
+ <term>--conf</term>
+<listitem>Path to manitou-mdx configuration file (default: <filename>/etc/manitou-mdx.conf</filename>)</listitem>
+ </varlistentry>
+
+ <varlistentry>
+<term>--quiet</term>
+ <listitem>No output unless an error occurs. The default is to output information messages in addition to error messages.</listitem>
+</varlistentry>
+
+</variablelist>
+
+</sect1>
+
+
+<sect1 id="manitou-mgr.inverted-index">
+<title>Inverted full-text index management commands</title>
+<para>
+<cmdsynopsis>
+  <command>manitou-mgr</command>
+  <group choice="req">
+    <arg choice="req">--clear-full-text-index</arg>
+    <arg choice="req">--reindex-full-text
+       <arg>--reindex-partitions=<replaceable>N-M</replaceable></arg>
+       <arg>--reindex-jobs=<replaceable>J</replaceable></arg>
+    </arg>
+  </group>
+<sbr/>
+  <arg>--conf=<replaceable>/path/to/configfile</replaceable></arg>
+  <arg>--quiet</arg>
+</cmdsynopsis>
+</para>
+
+Options:
+<variablelist>
+
+ <varlistentry>
+  <term>--clear-full-text-index</term>
+  <listitem>Clear the inverted full text index by truncating the relevant SQL tables. This is recommended before a complete rebuild of the index.</listitem>
+</varlistentry>
+
+ <varlistentry>
+  <term>--reindex-full-text</term>
+  <listitem>Rebuild the full text index, either entirely, for one partition, or for a range of partitions.</listitem>
+</varlistentry>
+
+ <varlistentry>
+  <term>--reindex-jobs</term>
+  <listitem>The number of child processes that may run in parallel to speed up reindexing on machines with multiple cores.</listitem>
+</varlistentry>
+
+ <varlistentry>
+  <term>--reindex-partitions</term>
+  <listitem>When not specified, all partitions are indexed. If specified as a number (starting at 0), only this partition is reindexed. When specified as a range in <literal>N-M</literal> form, all partitions between N and M inclusive are reindexed.</listitem>
+</varlistentry>
+
+ <varlistentry>
+ <term>--conf</term>
+<listitem>Path to manitou-mdx configuration file (default: <filename>/etc/manitou-mdx.conf</filename>)</listitem>
+ </varlistentry>
+
+ <varlistentry>
+<term>--quiet</term>
+ <listitem>No output unless an error occurs. The default is to output information messages in addition to error messages.</listitem>
+</varlistentry>
+
+</variablelist>
+
+</sect1>
+
+
+
+<sect1 id="manitou-mgr.reporting">
+<title>Reporting commands</title>
+<para>
+<cmdsynopsis>
+  <command>manitou-mgr</command>
+  <arg>--conf=<replaceable>/path/to/configfile</replaceable></arg>
+  <arg>--quiet</arg>
+<sbr/>
+  <group opt="req">
+    <arg>--print-size </arg>
+  </group>
+</cmdsynopsis>
+</para>
+
+
+<variablelist>
+
+ <varlistentry>
+  <term>--print-size</term>
+  <listitem>Print the total database size, and a subset of the database tables with their sizes in bytes</listitem>
+</varlistentry>
+
+ <varlistentry>
+ <term>--conf</term>
+<listitem>Path to manitou-mdx configuration file (default: <filename>/etc/manitou-mdx.conf</filename>)</listitem>
+ </varlistentry>
+
+ <varlistentry>
+ <term>--quiet</term>
+ <listitem>No output unless an error occurs. The default is to output information messages in addition to error messages.</listitem>
+ </varlistentry>
+
+</variablelist>
+
+
+</sect1>
+
+</chapter> <!-- manitou-mgr -->

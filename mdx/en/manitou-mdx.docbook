@@ -1,0 +1,1143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<chapter id="manitou-mdx">
+<title>manitou-mdx (Mail Database eXchanger)</title>
+
+<sect1 id="manitou-mdx-intro">
+<title>Usage</title>
+<para>
+manitou-mdx imports new mail into the database and exports outgoing messages to the mail system. It is also responsible for applying filters, updating the full text index, and running custom pre-processing, post-processing and maintenance functions.
+</para>
+<para>Except when the --mboxfile option is used, the manitou-mdx process runs continuously, polling the database for outgoing messages to send, and checking the incoming directories for messages to import.
+</para>
+
+<para>
+To launch manitou-mdx as a daemon process, use:
+  <cmdsynopsis>
+   <command>manitou-mdx</command>
+   <arg>--conf=<replaceable>/path/to/config_file</replaceable></arg>
+   <arg>--pidfile=<replaceable>/path/to/pid_file</replaceable></arg>
+   <arg>--fork</arg>
+  </cmdsynopsis>
+</para>
+
+<para>
+To import a mailbox into the database, use:
+
+  <cmdsynopsis>
+   <command>manitou-mdx</command>
+   <arg>--conf=<replaceable>/path/to/config_file</replaceable></arg>
+   <arg>--mboxfile=<replaceable>/path/to/mboxfile</replaceable>
+     <arg>--skip=<replaceable># of msgs</replaceable></arg>
+   </arg>
+   <arg>--status=<replaceable>import_status</replaceable></arg>
+   <arg>--tag=<replaceable>tagname</replaceable></arg>
+  </cmdsynopsis>
+</para>
+
+<para>Options are:
+  <variablelist>
+    <varlistentry>
+      <term><option>--conf=<replaceable>/path/to/config_file</replaceable></option></term>
+        <listitem><para>Indicates the path of the configuration file. The default value is <literal>/etc/manitou-mdx.conf</literal>
+        </para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--mboxfile=<replaceable>/path/to/mboxfile</replaceable></option></term>
+        <listitem><para>Import a set of messages from a file in mbox format. When this options is used, manitou-mdx quits after the import is finished, instead of acting as a daemon.
+        </para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--skip=<replaceable># of messages</replaceable></option></term>
+        <listitem><para>If used, this option gives the number of messages to skip from the mbox file to import. This is useful to retry an import that would have previously failed part way.
+        </para></listitem>
+    </varlistentry>
+
+    <varlistentry>
+      <term><option>--status=<replaceable>status value</replaceable></option></term>
+        <listitem><para>An integer value that will be used as the status of each imported mail. The typical use case is to mark the messages as already read (--status=1). By default, the status is 0, meaning that the messages are considered as new. See <xref linkend="table.mail"/> for the possible values of the mail.status column. <remark>Filters can still modify the status value.</remark>
+        </para></listitem>
+    </varlistentry>
+
+
+  </variablelist>
+</para>
+
+  
+</sect1>
+
+<sect1 id="mdx.config">
+<title>Configuration file</title>
+
+<sect2><title>Location</title></sect2>
+By default, the configuration file is located at <filename>/etc/manitou-mdx.conf</filename>.
+Both manitou-mgr and manitou-mdx accept the <literal>--conf</literal> option to specify an alternative file.
+
+<sect2 id="mdx.config.struct">
+<title>Structure</title>
+<para>The file is divided into sections: one common section at the top of the file, followed by one section per identity.</para>
+<para>
+The common section contains configuration options that apply by default to all identities. Then each identity's section can override specific options, or provide values for options that are not referenced in the common section. Options appearing in a identity section only apply to that identity.
+</para>
+
+<sect3>
+<title>Syntax rules</title>
+<itemizedlist>
+<listitem><para>blank lines and lines starting with # are ignored</para></listitem>
+<listitem><para>blanks around the first '=' sign of a line are ignored.</para></listitem>
+<listitem><para>trailing blanks are ignored.</para></listitem>
+<listitem><para>Some parameters accept multi-lines values, in which case a backslash (\) at the end of the line is the continuation character to use.</para></listitem>
+</itemizedlist>
+</sect3>
+
+<sect3>
+<title>Example</title>
+<programlisting>
+[common]
+db_connect_string = Dbi:Pg:dbname=mail;user=mailadmin
+local_delivery_agent=/usr/sbin/sendmail -f $FROM$ -t
+plugins_directory = /usr/share/perl/5.10
+
+# one identity
+[mymail@example.com]
+index_words=yes
+mailfiles_directory=/var/manitou/spool/mymail
+
+# another identity
+[mymail2@example.net]
+mailfiles_directory=/var/manitou/spool/mymail2
+index_words=no
+preferred_datetime=sender
+</programlisting>
+</sect3>
+</sect2>
+
+<sect2 id="mdx.config.options">
+<title>Alphabetical list of options</title>
+<sect3>
+<title>alive_interval</title>
+<indexterm><primary>alive_interval</primary></indexterm>
+<para>
+In: [common] section only. 
+</para>
+<para>
+When this parameter is set, manitou-mdx will update the runtime_info table every 'alive_interval' seconds, with an entry containing the current timestamp (timestamp means the current date and time expressed as a number of seconds elapsed since Jan,1st 1970 UTC). The timestamp is put in the runtime_info.rt_value column of the row that matches rt_key='last_alive'. Its purpose is to be read by an external process to periodically check that manitou-mdx is alive and running.
+</para>
+<para>
+Since it involves a write into the database, the value for 'alive_interval' should not be too small or the table will get rapidly bloated and performance degraded. For example any value below 60s is probably unnecessary small, while 600s looks reasonable.
+</para>
+<para>
+The default is to leave it unset, meaning there is no update of the last_alive entry. A value of zero has the same meaning.
+</para>
+</sect3>
+
+<sect3>
+<title>auto_db_reconnect</title>
+<indexterm><primary>auto_db_reconnect</primary></indexterm>
+<para>In: [common] section only.</para>
+<para>When set to "yes", manitou-mdx will try to reconnect to the database when an error occurs that may be due to a loss of its connection to the database. When set to "false", it will abort with a fatal error.</para>
+<para>The default is yes.</para>
+</sect3>
+
+<sect3 id="mdx.db_connect_string">
+<indexterm><primary>db_connect_string</primary></indexterm>
+<title id="db_connect_string.title">db_connect_string</title>
+<para>In: [common] section only.</para>
+<para>
+The connection string used to connect to the manitou-mail database, formatted as needed by the DBD::Pg perl driver.
+
+Example:
+<programlisting>
+db_connect_string = dbi:Pg:dbname=mail;user=mailadmin;password=pass;host=dbserver
+</programlisting>
+</para>
+<para>
+The dbname, user, password and host parameters should suffice for most installations. However for more customized setups, additional options can be provided in the connect string. Please refer to the documentation of DBD::Pg and/or the PostgreSQL manual for more information. 
+</para>
+</sect3>
+
+<sect3>
+<title>detach_text_plain</title>
+<indexterm><primary>detach_text_plain</primary></indexterm>
+
+<para>In: [common] or identities sections.</para>
+<para>When set to "yes", text/plain attachments with no filename get included into the body of the messages instead of being kept separate. Such attachments are typically the text part of HTML messages, so it's more convenient to have them in the body.</para>
+<para>The default is yes.</para>
+</sect3>
+
+<sect3>
+<indexterm><primary>flush_word_index_interval</primary></indexterm>
+<title>flush_word_index_interval</title>
+<para>In: [common] section only.</para>
+<para>It is the number of seconds during which word vectors used by
+the full text indexer are kept in memory, before being flushed
+to the database. During this lapse of time, the newly imported
+mails are not yet full-text searchable by other programs such
+as the user interface.</para>
+<para>Flushing the vectors induces a spike of disk activity in the
+database, so increasing the delay between flushings reduces
+the load on the database.</para>
+<para>This parameter can be changed in combination with
+<parameter>flush_word_index_max_queued</parameter>. It is ignored if
+<parameter>index_words</parameter> is set to "no".
+</para>
+<para>The default value is 300.</para>
+</sect3>
+
+<sect3><title>flush_word_index_max_queued</title>
+<indexterm><primary>flush_word_index_max_queued</primary></indexterm>
+<para>In: [common] section only.</para>
+<para>It is the maximum number of messages for which word vectors
+are kept in memory before being flushed
+to the database, and thus made available to the full-text
+search functionality.
+The parameter is ignored if <parameter>index_words</parameter> is set to "no".
+</para>
+<para>The default value is 100.</para>
+</sect3>
+
+<sect3>
+<indexterm><primary>incoming_check_interval</primary></indexterm>
+<title>incoming_check_interval</title>
+<para>In: [common] section only.</para>
+<para>It is the number of seconds that manitou-mdx will wait before checking
+for new messages to be imported from the spool directory.
+</para>
+<para>Setting it too small will generate too much unnecessary disk activity.
+When at least one file is available, all messages ready to be imported
+will be processed.
+</para>
+<para>The default is 60 (one check every minute)</para>
+<para>Example:
+<programlisting>
+# check for new mail every 120s
+incoming_check_interval=120
+</programlisting>
+</para>
+</sect3>
+
+<sect3>
+<indexterm><primary>incoming_mimeprocess_plugins</primary></indexterm>
+<title>incoming_mimeprocess_plugins</title>
+<para>In: [common] or identities sections.</para>
+<para>This is a multiline entry that declares the Perl plugins
+that should be run against incoming messages at import time,
+after having been parsed and before being stored into the database.
+See <xref linkend="mdx.plugins" endterm="plugins-title"/> for more information on plugins.
+</para>
+
+<para>Example:
+<programlisting>
+incoming_mimeprocess_plugins = bayes_classify \
+			antispam("spamtag")
+</programlisting>
+</para>
+</sect3>
+
+<sect3><title>incoming_postprocess_plugins</title>
+<indexterm><primary>incoming_postprocess_plugins</primary></indexterm>
+<para>In: [common] or identities sections.</para>
+<para>This is a multiline entry that declares the Perl plugins
+that should be run against incoming messages at import time,
+after the message has been put into the database.
+See <xref linkend="mdx.plugins" endterm="plugins-title"/> for more information on plugins.
+</para>
+</sect3>
+
+<sect3><title>incoming_preprocess_plugins</title>
+<indexterm><primary>incoming_preprocess_plugins</primary></indexterm>
+<para>In: [common] or identities sections.</para>
+<para>This is a multiline entry that declares the Perl plugins
+that should be run against incoming messages at import time,
+before the mailfile is opened.
+See <xref linkend="mdx.plugins" endterm="plugins-title"/> for more information on plugins.
+</para>
+</sect3>
+
+<sect3><title>index_words</title>
+<indexterm><primary>index_words</primary></indexterm>
+
+<para>In: [common] or identities sections.</para>
+<para>A boolean value indicating whether manitou-mdx should index the
+body contents of incoming and outgoing messages. Such indexing allows
+the use of the fast words-search capability in manitou's user interface.
+It may be desirable to turn it off to reduce the database's disk usage.
+</para>
+<para>That directive can appear in the [common] section and be overriden by
+identities sections. It defaults to yes.
+</para>
+<para>Example:
+<programlisting>
+[mailbox@example.com]
+index_words = no
+</programlisting>
+</para>
+</sect3>
+
+<sect3><title>index_words_accent_mode</title>
+<indexterm><primary>index_words_accent_mode</primary></indexterm>
+<indexterm><primary>accents</primary></indexterm>
+
+<para>In: [common] or identities sections.</para>
+<para>The inverted word index can strip accents and diacritic marks from words to make it possible to search in accent-insensitive mode. Additionally it can store both versions of words: the original and accent-stripped version. This entry defines the behavior of the word extractor with regards to accents:
+<itemizedlist>
+<listitem><literal>dual</literal>: the default value. Index both forms of any accented word, with and without accents.</listitem>
+<listitem><literal>strip</literal>: index only the form without accents.</listitem>
+<listitem><literal>keep</literal>: index the word as is, without any consideration for accents or lack thereof.</listitem>
+</itemizedlist>
+
+Example:
+<programlisting>
+[mailbox@example.com]
+index_words_accent_mode = strip
+</programlisting>
+</para>
+</sect3>
+
+
+<sect3 id="index_words_extractors">
+<title id="index_words_extractors.title">index_words_extractors</title>
+<indexterm><primary>index_words_extractors</primary></indexterm>
+
+<para>In: [common] or identities sections. Multi-line declaration.</para>
+
+<para>Word extractors are external commands that are launched by
+manitou-mdx with attachments contents piped to their standard input. They
+extract words and output them encoded in utf-8 to the standard output.
+manitou-mdx associates these words in the inverted word index to the message
+being processed.</para>
+
+<para>Example:
+<programlisting>
+[mailbox@example.com]
+index_words_extractors = application/pdf: /opt/scripts/pdf2text \
+	application/msword: /opt/scripts/word2text
+</programlisting>
+</para>
+</sect3>
+
+<sect3 id="index_words_html_parts"><title id="index_words_html_parts.title">index_words_html_parts</title>
+<indexterm><primary>index_words_html_parts</primary></indexterm>
+
+<para>In: [common] or identities sections.</para>
+<para>A boolean value indicating whether manitou-mdx should index the
+HTML contents of incoming and outgoing messages.
+This option can appear in the [common] section and be overriden by
+identities sections. It defaults to yes.
+</para>
+<para>Example:
+<programlisting>
+[mailbox@example.com]
+index_words_html_parts = no
+</programlisting>
+</para>
+</sect3>
+
+<sect3><title>init_sql</title>
+<indexterm><primary>init_sql</primary></indexterm>
+
+<para>In: [common] section.</para>
+<para>A multiline entry with SQL statements to be executed after each successful database connection. The typical use case is to SET specific SQL parameters.
+</para>
+<para>Example:
+<programlisting>
+init_sql = SET TIME ZONE 'Europe/Rome' \
+  SET search_path TO myschema,public
+</programlisting>
+</para>
+</sect3>
+
+<sect3><title>local_delivery_agent</title>
+<indexterm><primary>local_delivery_agent</primary></indexterm>
+
+<para>In: [common] or identities sections.</para>
+<para>The external command to which outgoing mail is passed by manitou-mdx. This
+is typically a sendmail-like command along with its arguments.
+The message is passed to the command through its standard input.
+If the <literal>$FROM$</literal> substring is found, it will be substituted with
+the email address of the identity attached to the message when it was composed.</para>
+<para>Example:
+<programlisting>
+[common]
+local_delivery_agent=/usr/lib/sendmail -f $FROM$ -t
+</programlisting>
+</para>
+</sect3>
+
+<sect3 id="mailfiles_directory"><title>mailfiles_directory</title>
+<indexterm><primary>mailfiles_directory</primary></indexterm>
+<para>In: identities sections</para>
+<para>The path of the directory where incoming mailfiles are looked for.
+It is the fact that a mailfile is found in the associated spool directory
+that tells the mdx that the message is to be associated with this identity.
+Other possible sources of incoming mail are <xref linkend="spool_mailbox" endterm="spool_mailbox.title"/>
+for mbox files and <xref linkend="spool_maildir" endterm="spool_maildir.title"/> for a maildir
+directory structure.
+</para>
+<para>
+Example:
+<programlisting>
+[support@example.com]
+mailfiles_directory=/var/tmp/manitou/spool/support
+</programlisting>
+</para>
+</sect3>
+
+<sect3><title>maintenance_plugins</title>
+<indexterm><primary>maintenance_plugins</primary></indexterm>
+<para>In: [common] section.</para>
+<para>Multi-line declaration of plugins that run periodically.
+The period is either a time interval such as 10mn or 2h, or
+a point in time in the day such as 20:30.
+</para>
+
+<para>Example:
+<programlisting>
+# vacuum every 2 hours
+maintenance_plugins = 2h vacuum
+</programlisting>
+</para>
+</sect3>
+
+<sect3><title>no_send</title>
+<indexterm><primary>no_send</primary></indexterm>
+<para>In: [common] or identities sections.</para>
+<para>Set to yes if manitou-mdx should not send any outgoing message,
+even if such messages are available in the database.</para>
+<para>If set to no or not set at all, manitou-mdx will pass outgoing
+messages to the local mailer and mark them as sent in the database.
+</para>
+</sect3>
+
+<sect3><title>outgoing_bcc</title>
+<indexterm><primary>outgoing_bcc</primary></indexterm>
+
+<para>In: [common] or identities sections.</para>
+<para>An email address to which all outgoing email will be carbon-copied,
+using the Bcc field. Several email addresses separated by commas can
+also be used. This can be used for debugging, backup, or tracking purposes.
+</para>
+<para>Example:
+<programlisting>
+# blind-copy all outgoing mail to the local 'outgoing' address
+outgoing_bcc=outgoing@localhost
+</programlisting>
+</para>
+</sect3>
+
+<sect3><title>outgoing_check_interval</title>
+<indexterm><primary>outgoing_check_interval</primary></indexterm>
+<para>In: [common] section only.</para>
+<para>The number of seconds that manitou-mdx will sleep before checking
+for pending outgoing messages to send. Checking for outgoing messages is
+implemented as a fast database query.</para>
+<para>The default is 5.</para>
+<para>Example:
+<programlisting>
+# check for new mail to send every 60s
+outgoing_check_interval=60
+</programlisting>
+</para>
+</sect3>
+
+<sect3><title>plugins_directory</title>
+<indexterm><primary>plugins_directory</primary></indexterm>
+<para>In: [common] section only</para>
+
+<para>The location of a directory where manitou-mdx plugins are to be searched first. Plugins are perl modules named after the plugin name followed by a <literal>.pm</literal> suffix.
+When specified, this directory must contain a <literal>Manitou/Plugins</literal> subdirectory, which itself contains the module files.
+</para>
+<para>By default, <literal>plugins_directory</literal> is not specified and the Perl interpreter follows its own algorithm to find the manitou-mdx plugin modules as it does with any other Perl module.</para>
+</sect3>
+
+<sect3><title>postprocess_mailfile_cmd</title>
+<indexterm><primary>postprocess_mailfile_cmd</primary></indexterm>
+In: [common] or identities sections.
+<para>A shell command run each time a mailfile has
+been processed, with the following arguments:
+<itemizedlist>
+<listitem>$0: a string telling the result of the mailfile processing, with
+three possible values: <literal>imported</literal>, <literal>error</literal> or 
+<literal>discarded</literal>. A message is discarded when the action resulting
+from applying the filtering rules is "delete".</listitem>
+<listitem>$1: the current name and path of the mailfile</listitem>
+<listitem>$2: the identity's email (based on this config file)</listitem>
+</itemizedlist>
+</para>
+
+<para>Example:
+This postprocess command copies the mailfile to a daily tar archive
+and then removes the mailfile.
+<programlisting>
+<![CDATA[
+postprocess_mailfile_cmd = cd `dirname $1` && tar -f /var/manitou/archive/daily-$0.`date +%Y%m%d`.tar -r `basename $1` && rm $1
+]]>
+</programlisting>
+Note that the command has to be a one-liner. For complex processing, it
+is necessary to point postprocess_mailfile_cmd to a user-made
+shell script. Example:
+<programlisting>
+postprocess_mailfile_cmd = /usr/manitou/bin/postprocess.sh $0 $1 $2
+</programlisting>
+</para>
+</sect3>
+
+<sect3><title>preferred_charset</title>
+<indexterm><primary>preferred_charset</primary></indexterm>
+<para>In: [common] or identities sections.</para>
+
+<para>The charset to which the bodies of outgoing mail should be
+converted before being set. Examples of values are utf-8, iso-8859-1,
+iso-8859-15, us-ascii...
+</para>
+<para>When left unset, manitou-mdx will try to find a suitable charset based on
+the database encoding and possibly the contents of the message to send.
+</para>
+<para>Example:
+<programlisting>
+# use utf-8 to encode anything
+preferred_charset = utf-8
+</programlisting>
+</para>
+</sect3>
+
+<sect3><title>preferred_datetime</title>
+<indexterm><primary>preferred_datetime</primary></indexterm>
+
+<para>In: [common] or identities sections.</para>
+<para>Each message has a internal date field in the database whose value can
+differ from the mail's headers date field. The header contains the sender's
+computer date at the time the message was sent. This date can be wrong
+or the delay between the sending and the fetch of the message into the
+database can be significant.</para>
+
+<para>The 'preferred_datetime' parameter tells whether the internal date
+field of an incoming message should be set to the sender date or to
+the message's arrival date.  The possible values are:
+<itemizedlist>
+<listitem><literal>sender</literal>: the sender's date is used. Recommended if you're
+often offline and the incoming messages are not necessarily imported
+into manitou-mail on a regular basis, in a stream-like fashion. Note
+that the sender's date can be wrong (badly formatted or faked by the sender).
+</listitem>
+<listitem><literal>mtime</literal>: the last modification's date of the file containing
+the message. Recommended if mail is fetched on a regular basis or if
+the arrival date is to be considered more significant than the
+sender's date.
+</listitem>
+</itemizedlist>
+</para>
+
+<para>The default is <literal>mtime</literal>.</para>
+</sect3>
+
+<sect3><title>security_checks</title>
+<indexterm><primary>security_checks</primary></indexterm>
+<para>In: [common] section only.</para>
+<para>When set to "yes", the tmpdir directory permissions and owner
+are checked to make sure that no other user can create files
+or symlinks into it. If that check fails, the program exits immediately.
+When security_checks is set to "no", the result of the test is ignored.
+</para>
+<para>The default is set to "yes".</para>
+<para>Example:
+<programlisting>
+security_checks=yes
+</programlisting>
+</para>
+</sect3>
+
+<sect3 id="spool_mailbox"><title id="spool_mailbox.title">spool_mailbox</title>
+<indexterm><primary>spool_mailbox</primary></indexterm>
+<para>In: identities sections</para>
+<para>The full path of the mailbox file where incoming mail is checked for
+and extracted from for this identity.
+The mailbox is not the recommended method to store mail because of the locking
+needed to avoid conflicts between mail delivery and mail reading. Maildir is the
+recommended method.
+When a new message arrives in the mailbox, or when the mailbox contains initial messages on manitou-mdx start, they get moved to a different location with movemail and then imported into the manitou-mail database.
+Other possible sources of incoming mail are <xref linkend="mailfiles_directory" />
+for a directory containing *.received files and
+<xref linkend="spool_maildir" endterm="spool_maildir.title"/> for a maildir directory structure.
+</para>
+<para>
+Example:
+<programlisting>
+[support@example.com]
+spool_mailbox=/var/spool/mail/manitou
+</programlisting>
+</para>
+</sect3>
+
+<sect3 id="spool_maildir"><title id="spool_maildir.title">spool_maildir</title>
+<indexterm><primary>spool_maildir</primary></indexterm>
+<para>In: identities sections</para>
+<para>The full path of the maildir structure where incoming mail is checked for
+and imported into the manitou-mail database for this identity.
+When a new message arrives in the mailbox, or when the mailbox contains initial messages on manitou-mdx start, they get moved to a different location with movemail and then imported into the manitou-mail database.
+Other possible sources of incoming mail are <xref linkend="mailfiles_directory" />
+for a directory containing *.received files and
+<xref linkend="spool_mailbox" endterm="spool_maildir.title"/> for a mailbox file.
+</para>
+<para>
+Example:
+<programlisting>
+[support@example.com]
+spool_maildir=/home/manitou/Maildir
+</programlisting>
+</para>
+</sect3>
+
+<sect3><title>store_filenames</title>
+<indexterm><primary>store_filenames</primary></indexterm>
+
+<para>In: [common] or identities sections.</para>
+<para>A boolean value telling whether each mailfile's name and path should be
+stored into the <literal>files</literal> table of the database, associated with its
+mail_id. If the mailfiles are not deleted after processing, that
+table allows to retrieve a message in its original non-decoded form
+from it's database mail_id.</para>
+<para>The default is set to yes</para>
+<para>Example:
+<programlisting>
+store_filenames=no
+</programlisting>
+</para>
+<para>
+See <xref linkend="table.files"/> for more
+information on this table.
+</para>
+</sect3>
+
+<sect3><title>store_raw_mail</title>
+<indexterm><primary>store_raw_mail</primary></indexterm>
+
+<para>In: [common] or identities sections.</para>
+<para>A boolean value telling if the original contents of imported mail
+messages should be stored as a binary large object in the
+raw_mail table. This allows to retrieve a message in its
+original non-decoded form by it's database mail_id, even after the
+mailfile has been deleted.
+</para>
+<para>The default is set to no</para>
+<para>Example:
+<programlisting>
+store_raw_mail=yes
+</programlisting>
+</para>
+</sect3>
+
+<sect3><title>tags_incoming</title>
+<indexterm><primary>tags_incoming</primary></indexterm>
+
+<para>In: [common] or identities sections.</para>
+<para>This is a multi-line entry that lists the tags that should be
+applied to all the messages coming from a spool. Note that a plugin
+called on incoming messages is still able to remove or add any
+tag. Each tag's name must be on a line by itself, consecutive lines
+being separated by a backslash followed by a newline.  White spaces
+before the backslash will be ignored, as well as white spaces between
+the start of the line and the first non-space character.  All the
+other characters are considered to be part of the tag's name.  If a
+tag declared in the configuration file doesn't exist in the database,
+it will be inserted into it as soon as it's needed.
+</para>
+<para>A typical use of tags_incoming, for installations that use a single database
+schema for several identities, is to create a tag per identity.</para>
+
+<para>Example:
+<programlisting>
+[one-email@example.com]
+tags_incoming = tag1 \
+		one-email-tag\		# comment
+		tag2
+</programlisting>
+</para>
+</sect3>
+
+
+<sect3><title>tmpdir</title>
+<indexterm><primary>tmpdir</primary></indexterm>
+<para>In: [common] section only.</para>
+<para>A directory where temporary files will be created for attachments.
+That directory, if it already exists, should have such permissions
+that no other user than the one running manitou-mdx should be able to
+read or write into.
+By default, a new temporary directory will be created in a location
+that depends on the configuration of the operating system.
+</para>
+
+<para>Example:
+<programlisting>
+# system-wide temp directory
+tmpdir=/var/tmp/manitou
+</programlisting>
+</para>
+</sect3>
+
+</sect2>
+
+
+</sect1>
+
+<sect1 id="mdx.importing-mbox">
+<title>Importing an existing mailbox in mbox format</title>
+<programlisting>
+$ manitou-mdx --conf=/path/to/config_file --mboxfile=/path/to/mboxfile \
+  [--tag=optional_tagname] [--status=1] [--mailbox=name@example.com]
+</programlisting>
+
+<para>If the <literal>--tag</literal> option is used and the tag doesn't exist, it will be created. For a sub-tag (that is not at the top level of the tags hierarchy), the syntax to use is <literal>parent->subtag</literal>.
+The --status=1 option has the effect of marking the imported mail as already read, otherwise it will be considered as new.
+Optionally, the --mailbox argument can be used to specify to what mailbox the messages should be assigned. The mailbox will be created in the database, if it doesn't exist.</para>
+
+</sect1>
+
+<sect1 id="mdx.delivery">
+<title>Delivering incoming mail into files</title>
+<para>It is assumed that the incoming mail for manitou-mdx is received by a local unix account (fetchmail default behavior), or locally mail-dropped (fetchmail with --mda or <literal>maildrop</literal>). One of these methods may be used:</para>
+
+<sect2 id="mdx.delivery.global">
+<title>System-wide installation</title>
+<para>The following line can be added to the <filename>/etc/aliases</filename> file to make the incoming mail being piped into manitou-spool:</para>
+
+<programlisting>
+myaccount: "|manitou-spool /path/to/some/manitou/spool-directory"
+</programlisting>
+(the <command>newaliases</command> command must be run for the aliases file to be reloaded).
+</sect2>
+
+<sect2 id="mdx.delivery.private">
+<title>User-private installation (using procmail)</title>
+<para>
+To drop the mailfiles into a directory named for instance <filename>$HOME/private/manitou/spool</filename>, the following lines should be added to the .procmailrc file in the HOME directory: </para>
+<programlisting>
+:0
+|manitou-spool $HOME/private/manitou/spool
+</programlisting>
+
+<para>Procmail is popular for its filtering capabilities, but a simple <filename>$HOME/.forward</filename> file is sufficient to deliver into mailfiles. Refer to the local mail system documentation on how to set up a .forward file. </para>
+</sect2>
+
+</sect1>
+
+<sect1 id="mdx.monitoring">
+<title>Monitoring</title>
+<para>Once the automatic import is activated, each new incoming mail should come up as a new file in a mailfile directory. It is created with a .received suffix, which gets renamed to .processed as soon as manitou-mdx has imported it into the database. manitou-mdx will check periodically for new files in these directories.
+
+It is also possible to monitor via the <literal>runtime_info</literal> table of the database. See the <literal>alive_interval</literal> parameter in the configuration file. </para>
+</sect1>
+
+<sect1 id="mdx.plugins">
+<title id="plugins-title">mdx plugins</title>
+<para>The functionalities of manitou-mdx can be extended by writing Perl modules that are hooked to manitou-mdx as plugins. 
+A plugin module may be a self-contained piece of code, but more often it's used as an interface to an external program, such as a spam filter or a converter that extracts text from a complex file format. Also, plugins may use external Perl modules from <ulink url="http://www.cpan.org">the CPAN archive</ulink> or other sources.
+</para>
+
+Here are some examples of what plugins can do:
+
+<itemizedlist>
+
+<listitem>classify incoming messages according to custom business rules.</listitem>
+<listitem>open attachments and pass their contents to the full text indexer.</listitem>
+<listitem>call external filters such as anti-virus and anti-spam and act upon the result.</listitem>
+<listitem>match the sender with another database (customer db, whitelist, blacklist,...).</listitem>
+<listitem>route a message, change its priority.</listitem>
+<listitem>trigger alerts.</listitem>
+<listitem>add additional information in headers or the private note.</listitem>
+
+</itemizedlist>
+
+<sect2 id="mdx.plugin.types">
+<title>Plugin types</title>
+
+Plugins can be called at different stages of the mail processing, depending on what kind of functionality they provide. There are four types of plugins:
+<itemizedlist>
+<listitem><para><literal>incoming_preprocess_plugins</literal> are called before a message is opened and analyzed by manitou-mdx, and have read and write access to the raw mail file. For example, a sample spamassassin client is implemented as an incoming_preprocess_plugins, because SA expects a raw mail file, as does clamav.</para>
+ </listitem>
+
+<listitem><para><literal>incoming_mimeprocess_plugins</literal> are called after the message has been parsed by manitou-mdx, and before it's put into the database. These plugins have read/write access to the parsed form of the message (perl MIME object with decoded parts).</para>
+</listitem>
+
+<listitem><para><literal>incoming_postprocess_plugins</literal> are called after a
+message has been commited into the database and all associated actions
+have been carried out.</para>
+</listitem>
+
+<listitem><para><literal>outgoing_plugins</literal> are called before passing an outgoing
+message to the mail system. They can modify the message,
+for example by adding a digital signature or additional headers.</para>
+</listitem>
+
+<listitem><para><literal>maintenance_plugins</literal> are called periodically by the
+mdx to carry out special maintenance tasks such as archiving files or running statistics.
+Maintenance plugins perform tasks that could be assigned to crontab
+scripts, except that they have access to an already opened database
+connection and current configuration options, and they're not run
+concurrently with the other mdx functions, such as importing or
+sending messages, so that no database access contention occurs.</para>
+</listitem> </itemizedlist> </sect2>
+
+<sect2>
+<title>Declaration</title>
+Plugins are declared in the configuration file, through these directives:
+
+<programlisting>
+      # in the [common] section of the configuration
+      plugins_directory = /path/to/plugins
+
+      # in a [mailbox] section (the plugin will be called only for mails to that mailbox)
+      incoming_preprocess_plugins = plugin1(arg1,arg2,...) \
+      plugin2(arg1,arg2,arg3...) \
+      plugin3 \
+      ...
+
+      incoming_postprocess_plugins: same syntax than incoming_preprocess_plugins
+
+      incoming_mimeprocess_plugins: same syntax than incoming_preprocess_plugins
+
+      outgoing_plugins: same syntax than incoming_preprocess_plugins
+
+      maintenance_plugins: the declaration begins with a time frequency specification, which is either:
+          o an interval expressed as a number of hours. Example: 10h. That will make the plugin run every 10 hours, starting 10 hours after the program launch.
+          o an interval expressed as a number of minutes. Example: 100mn.
+          o a point in time. Example 12h10 will make the plugin run every day at 12h10. The hour range is 0 to 23, 0 being midnight.
+          o a point in time every hour. Example: *:20 will make the plugin run at 0:20, 1:20, 2:20 and so on. 
+
+      They are not tied to a mailbox, and thus should appear in the [common] section.
+
+</programlisting>
+<para>
+      Invocation of maintenance plugins are serialized: two plugins never run at the same time. Also, mail import and export is stopped when a plugin runs. 
+Example: 
+
+<programlisting>
+[common]
+plugins_directory = /usr/local/manitou/plugins
+maintenance_plugins = 5h vacuum \
+		      23:30 reporting
+
+[mailbox@example.com]
+#  plugins for that mailbox
+incoming_preprocess_plugins = spamc("tag for spam")
+incoming_postprocess_plugins = guesslang("en","fr") \
+                               anotherplugin(arg1,arg2,...)
+outgoing_plugins = gpgsign
+
+[mailbox2@example.com]
+incoming_preprocess_plugins = spamc("another tag for spam")
+</programlisting>
+</para>
+
+<para>
+Note that a declaration containing multiple plugins must be splitted across multiple lines, each line except the last one being ended by a backslash.
+</para>
+
+</sect2>
+
+<sect2>
+<title>Included plugins</title>
+
+<para>
+The distribution archive include those sample plugins:
+</para>
+
+<itemizedlist>
+<listitem><para><emphasis role="bold">spamc</emphasis>: an incoming_preprocess plugin that calls the <ulink url="http://www.spamassassin.org">SpamAssassin</ulink> client
+(spamc) on incoming messages to determine their spam probability and
+add a user-defined tag when positive.</para>
+</listitem>
+
+<listitem><para><emphasis role="bold">spam_learner</emphasis>: a maintenance plugin that runs <literal>sa-learn</literal> at regular intervals to feed the spamassassin Bayes database with new legitimate and spam messages. It handles the re-training of the spam filter in a way that requires no other action from the end-user than moving messages to or from the trashcan.</para>
+</listitem>
+
+<listitem><para>
+<emphasis role="bold">mswordindexer</emphasis>: a mime-process plugin that pass MS-word .doc
+attachments on to <ulink url="http://wvware.sourceforge.net/">wvWare</ulink>,
+convert them to Unicode text and add their words to the full-text
+index of the body.  This allows the user interface's search engine to
+retrieve those messages based on the contents of their attachments.</para>
+</listitem>
+<listitem><para>
+
+<emphasis role="bold">html_indexer</emphasis>: a mime-process plugin that pass the HTML contents from a message to the full-text indexer, allowing the search engine to retrieve these contents. The code requires the HTML::TreeBuilder and HTML::FormatText packages from the CPAN Perl Archive.</para>
+</listitem>
+
+<listitem><para>
+<emphasis role="bold">pdfindexer</emphasis>: an incoming_mimeprocess plugin that converts attached pdf files to text and feed them to the full text indexer. The conversion requires an external program, such as the <ulink url="http://en.wikipedia.org/wiki/Pdftotext">pdftotext</ulink> utility.
+</para>
+</listitem>
+
+<listitem><para>
+<emphasis role="bold">bayes_classify</emphasis>: a mime-process plugin that does automatic mail
+classification according to words contained in the message. The so-called
+"naive bayesian algorithm" has become popular for its efficiency in spam
+filtering, but can
+also be used more generally for automated classification:
+a <ulink url="http://en.wikipedia.org/wiki/Naive_Bayes_classifier">Wikipedia entry</ulink> explains this in detail.
+Read
+<ulink url="http://www.manitou-mail.org/tutorials/bayes-lang/lang-autodetect.html">the case study on automatic language detection</ulink> for a step by step introduction on how to set up
+and use the classifier plugin in Manitou-Mail.
+</para>
+</listitem>
+
+<listitem><para>
+<emphasis role="bold">attach_uploader</emphasis>: an outgoing plugin that replaces large
+attachments by a web link to the contents before sending a
+message. Such attachments are not welcome in Internet
+mail, and sometimes rejected, because they bog down mail
+servers, eat people's mailboxes quotas, and may cause trouble
+when being fetched.</para>
+<para>
+When this plugin is enabled, large attachments (the inline maximum
+size is configurable) are uploaded to an FTP server instead of being
+sent along with the mail.
+</para>
+<para>
+The plugin let Manitou-Mail users just attach files as usual and
+let manitou-mdx care whether they should be part of the message or
+taken outside.
+</para>
+</listitem>
+
+<listitem><para>
+<emphasis role="bold">attach_uploader_ssh</emphasis>: an outgoing plugin similar to attach_uploader except that it uses SSH instead of FTP to upload the files to the remote server, allowing the use of encryption and public/private key pairs for authentication.
+</para>
+</listitem>
+
+<listitem><para>
+<emphasis role="bold">tnef_decoder</emphasis>: an incoming_mimeprocess plugin that decodes the TNEF format produced by Outlook and replaces the application/ms-tnef part by the original attached contents. The code requires the <ulink url="http://search.cpan.org/~dougw/Convert-TNEF-0.17/">Convert::TNEF</ulink> module from CPAN.
+</para>
+</listitem>
+
+
+</itemizedlist>
+
+<para>A plugin is activated by installing the corresponding perl module file
+(with a .pm suffix) in the plugins directory, and declaring it in the
+configuration file, optionally with arguments, like this:
+</para>
+<programlisting>
+[common]
+# plugins_directory = /usr/share/perl5/Manitou/Plugins
+# learn new spam every 2 hours
+maintenance_plugins = 2h spam_learner
+
+[mailbox@company.com]
+# these plugins will be called only for that mailbox
+incoming_preprocess_plugins = spamc("tag for spam")
+outgoing_plugins = gpgsign
+incoming_postprocess_plugins = guesslang("en","fr") \
+                               anotherplugin(arg1,arg2,...)
+
+</programlisting>
+</sect2>
+
+<sect2 id="mdx.plugins.developement">
+<title>Developer information</title>
+<sect3>
+<title>Architecture</title>
+<para>A plugin named 'myplugin' should provide a myplugin.pm file declaring a myplugin package matching this structure:
+</para>
+
+<programlisting>
+package myplugin;
+
+sub init {
+  my $dbh=shift;
+  my @args=@_;	# user-supplied arguments
+
+  # optionally do initialization stuff using $dbh and @args
+
+  bless {}      # create the perl object and returns a reference to it
+}
+
+sub finish {
+  # do optional cleaning
+  1;
+}
+
+sub process {
+  my ($self, $context) = @_;
+
+  # $self=class pointer
+
+  # $context=pointer to a hash set up by the caller and that contains those keys:
+  #   stage: string whose value is "preprocess", "mimeprocess", "postprocess", "outgoing" or "maintenance"
+  #   dbh: the DBI connection object pointing to the mail database
+  #   filename: full path of the mailfile (undef if $context->{stage} is "outgoing" or "maintenance")
+  #   mail_id: an integer containing the unique id of the mail (undef if the stage is "preprocess" or "maintenance")
+  #   mimeobj: the MIME object containing the mail (undef if the stage is "preprocess" or "maintenance")
+  #   notice_log: a pointer to a function to log a notice message (to be called with the message as argument)
+  #   error_log: a pointer to a function to log an error message (to be called with the message as argument)
+
+  # The context is also used to communicate results to the caller and to the other plugins
+  # along the chain. The keys that are going to be interpreted are:
+  #   tags= perl array of tag names that should be assigned to the message.
+  #   action: undef if no particular action (insert the incoming message as new)
+  #     "discard" to discard an incoming message, "trash" to trash it
+
+
+  # Process the mail...
+  1;
+}
+
+1;   # the package should evaluate to 1
+</programlisting>
+<para>The plugin's name must not contain any non-ascii nor punctuation or space characters. Digits are allowed except for the first character of the name.</para>
+</sect3>
+
+
+<sect3>
+<title>Loading and initialization</title>
+<para>When manitou-mdx is launched, it searches the configuration file for all plugins and includes each corresponding perl module file once, using perl's require command. It means that in the example configuration shown, it would load these files from /usr/local/manitou/plugins:
+guesslang.pm, anotherplugin.pm, spamc.pm, gpgsign.pm (note that spamc will be instantiated twice).
+
+For each reference to a plugin, a new plugin perl class is instantiated, and its init() function called with the arguments from the config file along with a database handle. For the example configuration, the following instantiations would occur:
+
+</para>
+<programlisting>
+$pl1 = guesslang::init($dbh, "en","fr");
+$pl2 = anotherplugin::init($dbh, arg1,arg2,...);
+$pl3 = spamc::init($dbh, "tag for spam");
+$pl4 = gpgsign::init($dbh);
+$pl5 = spamc::init($dbh, "another tag for spam");
+
+</programlisting>
+<para>
+In the example above, since spamc is used twice, two separate spamc objects are instantiated and spamc::init is called on each of them. Variables used inside the spamc module may or may not be shared between different instances of a module: it is the responsibility of the plugin's writer to make the right choice between private variables inside the object ($self->var) or variables shared at the package level (my $var). 
+</para>
+
+<para>
+The user-supplied arguments for the init function are passed verbatim from the configuration file, and thus are to be considered as perl text. (technically, the call to the plugin's init function is embedded inside a perl eval call). Thus those user supplied arguments should be expressed as they would be inside a perl program, and every special character should be quoted according to perl syntax rules. Examples: </para>
+
+<programlisting>
+# @ sign quoted as per perl strings requirements
+incoming_preprocess_plugins=spamc("tag\@cf")
+
+# Simple quotes can be also used to avoid perl variables interpolation
+# inside strings
+incoming_preprocess_plugins=spamc('tag@cf$')
+
+# On the other hand, we may want to use perl's interpreter to evaluate
+# variables: here we're passing the value of the MAIL_ARCH_DIR environment
+# variable.
+incoming_postprocess_plugins=archivemsg($ENV{MAIL_ARCH_DIR})
+
+</programlisting>
+
+</sect3>
+
+<sect3>
+<title>Processing</title>
+<sect4>
+<title>Incoming mail</title>
+Each time a new message file appears in the mailfiles_directory associated to an identity, manitou-mdx carries out these actions:
+<orderedlist>
+<listitem>
+<para>It changes the file suffix (the part at the right of the dot) from .received to .pid.processing 
+</para>
+</listitem>
+
+<listitem>
+<para>If there are incoming_preprocess_plugins, it calls their process() functions, in the order of their declaration in the configuration file. The plugins are allowed to modify the mailfile if needed. 
+</para>
+</listitem>
+
+<listitem>
+<para>If one of the plugins has marked the mail as "to be discarded", the mailfile suffix is changed to .discarded and the processing of this message is stopped. 
+</para>
+</listitem>
+
+<listitem>
+<para>The mailfile is opened, parsed and put into a perl MIME object.
+</para>
+</listitem>
+
+<listitem>
+<para>If there are incoming_mimeprocess_plugins, their process() functions are called, in the order of their declaration in the configuration file. Plugins are allowed to modify the MIME object in memory in every way they see fit. 
+</para>
+</listitem>
+
+<listitem>
+<para>Once again, if one of the plugins has marked the mail as "to be discarded", the mailfile suffix is changed to .discarded and the processing of this message is stopped. 
+</para>
+</listitem>
+
+<listitem>
+<para>manitou-mdx does its own processing of the message, using the MIME object possibly modified by the plugins previously run. Then if no error has occured, it inserts it into the database and commits the transaction. 
+</para>
+</listitem>
+
+<listitem>
+<para>It changes the mailfile's suffix from .pid.processing to .processed, or to .error if an error has occured during the previous step.
+</para>
+</listitem>
+
+<listitem>
+<para>If there are incoming_postprocess_plugins, it calls them in the order of their declaration in the configuration file. Once all the plugins have been called, it commits whatever changes have been made in the database. 
+</para>
+</listitem>
+
+</orderedlist>
+</sect4>
+
+<sect4>
+<title>Outgoing mail</title>
+<para>When a message is ready to be sent (its status has the "Outgoing" bit and not the "Sent" bit), manitou-mdx does the following:
+<orderedlist>
+<listitem>
+<para>If there are outgoing_plugins attached to the identity of the message, their process functions are called with the outgoing mail built as a perl MIME object in memory, and the unique mail identifier in the database (mail_id). 
+</para>
+</listitem>
+
+<listitem>
+<para>Once all plugins have been run, the message will be passed from the MIME object in memory (possibly modified by the plugins) to the local mailer. Note that it is the plugin's responsibility to update the message in the database to reflect whatever change it makes in the MIME object in memory. 
+</para>
+</listitem>
+</orderedlist>
+</para>
+</sect4>
+
+<sect4>
+<title>Mailbox import</title>
+<para>When importing a mailbox with manitou-mdx (using the --mboxfile option), incoming_mimeprocess_plugins are called if:</para>
+
+<itemizedlist>
+<listitem><para>the --mailbox option is also specified in the command line with the value for an identity.</para></listitem>
+<listitem><para>the configuration has a declaration for that identity.</para></listitem>
+<listitem><para>that declaration includes incoming_mimeprocess_plugins lines.  </para></listitem>
+</itemizedlist>
+
+<para>Other kinds of plugins are not called. Each mail contained in the mailbox file goes through steps 4 to 7 of the incoming mail process described above.</para>
+</sect4>
+</sect3>
+</sect2>
+
+</sect1>
+
+<!--
+<sect1 id="mdx.troubleshooting">
+<title>Troubleshooting</title>
+Error messages:
+
+<errortext>
+No mailspool defined. In daemon mode, the configuration should define spool_maildir or spool_mailbox or mailfiles_directory for at least one identity.
+</errortext>
+<para>
+In daemon mode, manitou-mdx waits perpetually for new messages to import. But if no spool is defined, it would never import anything so instead it quits immediately with this error message.
+</para>
+
+<errortext>
+Unable to pass the mail to a local delivery agent.
+Check your configuration file for the 'local_delivery_agent' entry
+</errortext>
+<para>
+</para>
+</sect1>
+-->
+
+
+</chapter> <!-- manitou-mdx -->

@@ -1,0 +1,2851 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<chapter id="database-schema">
+<title>Database schema</title>
+
+
+      <section id="table.addresses"
+               xreflabel="addresses">
+        <title id="table.addresses-title">
+         Table:
+         
+         <structname>addresses</structname>
+        </title>
+ 
+
+<para>Contains an entry for each email address referenced by messages
+in the database. The email addresses are extracted from the header
+fields: To, Cc, From, Reply-To. The table is updated each time a new
+message is added to the database. It is also possible to add manually
+new addresses and comments, like in an address book.</para>
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>addresses</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>addr_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>Unique internal identifier for the email address. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>email_addr</structfield></term>
+              <listitem><para>
+                <type>character varying(300)</type>
+
+<para>The email address, in lowercase characters. It is unique. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>name</structfield></term>
+              <listitem><para>
+                <type>character varying(300)</type>
+
+<para>The name (or rfc822 comment) that is optionally associated to the email. </para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>nickname</structfield></term>
+              <listitem><para>
+                <type>character varying(300)</type>
+
+<para>An optional nickname for the contact. Can be used as an alias for the email address.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>last_sent_to</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+
+<para>The most recent date at which a mail has been sent by manitou to this address. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>last_recv_from</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+
+<para>The most recent date at which a mail sent by this address has been received by manitou.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>notes</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+<para>Optional comments about the contact. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>invalid</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+
+<para>A flag indicating that this address is invalid and shouldn't be used for future messages. Such addresses are to be kept in the table only if messages still reference them.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>recv_pri</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+
+
+<para>The priority of the contact. When a message comes from this email address (according to the From field), this value is added to priority of the message. </para>
+
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>nb_sent_to</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+
+
+
+<para>The total number of messages sent to this address. </para>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>nb_recv_from</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+
+<para>The total number of messages having this address as a recipient.</para>
+
+
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+        <itemizedlist>
+          <title>
+            Tables referencing mail_addresses via Foreign Key Constraints
+          </title>
+
+          <listitem>
+            <para>
+              <xref linkend="table.mail-addresses"/>
+            </para>
+          </listitem>
+
+        </itemizedlist>
+
+
+
+      </para>
+    </section>
+
+      <section id="table.attachment-contents"
+               xreflabel="attachment_contents">
+        <title id="table.attachment-contents-title">
+         Table:
+         
+         <structname>attachment_contents</structname>
+        </title>
+ 
+<para>
+Contains an entry for each attachment with its decoded content. To be used in conjunction with the <xref linkend="table.attachments"/> table. Identical attachment contents (same fingerprint) are shared between different attachments.</para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>attachment_contents</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>attachment_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>Unique internal identifier for the attachment. </para>
+
+                <literal>REFERENCES</literal> <xref linkend="table.attachments"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>content</structfield></term>
+              <listitem><para>
+                <type>oid</type>
+
+<para>A reference to a PostgreSQL binary large object (blob) The actual contents are located in the pg_largeobject table. </para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>fingerprint</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+<para>Base64-encoded SHA1 fingerprint of the contents. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.attachments"
+               xreflabel="attachments">
+        <title id="table.attachments-title">
+         Table:
+         
+         <structname>attachments</structname>
+        </title>
+ 
+<para>Contains one entry for each attachment. The actual attachments contents are stored in a dedicated table: attachment_contents.</para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>attachments</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>attachment_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+
+                <literal>PRIMARY KEY</literal>
+
+<para>Unique internal identifier for the attachment. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>The internal unique ID of the mail message to which the attachment belongs.</para>
+
+                <literal>REFERENCES</literal> <xref linkend="table.mail"/>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>content_type</structfield></term>
+              <listitem><para>
+                <type>character varying(300)</type>
+
+<para>The mime type of the attachment such as 'image/jpeg', 'text/plain', 'message/rfc822'... </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>content_size</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>The attachment's size in bytes.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>filename</structfield></term>
+              <listitem><para>
+                <type>character varying(300)</type>
+
+<para>The attachment's filename, if present. </para>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>charset</structfield></term>
+              <listitem><para>
+                <type>character varying(30)</type>
+
+<para>The character set for text contents (when content_type starts with 'text/'). Typical values are 'utf-8', 'iso-8859-1', 'us-ascii', ... </para>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>mime_content_id</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+<para>A string identifying the MIME part's content_id for the attachment. Other attachments may refer to this ID. For example HTML parts use &lt;img src="cid:content_id_of_part"&gt; to embed an attached picture.
+The use and syntax of content-ID is described in <ulink url="http://www.rfc-editor.org/rfc/rfc2392.txt">RFC 2392</ulink>.</para>
+
+           </para>
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+        <itemizedlist>
+          <title>
+            Tables referencing attachment_contents via Foreign Key Constraints
+          </title>
+
+          <listitem>
+            <para>
+              <xref linkend="table.attachment-contents"/>
+            </para>
+          </listitem>
+
+        </itemizedlist>
+
+      </para>
+    </section>
+
+      <section id="table.body"
+               xreflabel="body">
+        <title id="table.body-title">
+         Table:
+         
+         <structname>body</structname>
+        </title>
+ 
+<para>
+Contains the body of each message. The contents are decoded. A message may have no entry in this table if it doesn't have any text/plain nor text/html part that could be interpreted as its body at import time.
+</para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>body</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>Unique internal identifier of the message.</para>
+
+                <literal>REFERENCES</literal> <xref linkend="table.mail"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>bodytext</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+<para>The content of the body in plain text format. Possibly empty.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>bodyhtml</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+<para>The content of the body in html format. Possibly empty.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.config"
+               xreflabel="config">
+        <title id="table.config-title">
+         Table:
+         
+         <structname>config</structname>
+        </title>
+ 
+<para>
+Contains (key, values) string pairs that contain configuration information. Keys can be repeated with different values for different configurations names. 
+</para>
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>config</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>conf_key</structfield></term>
+              <listitem><para>
+                <type>character varying(100)</type>
+
+
+
+                <literal>NOT NULL</literal>
+<para>The name of the parameter. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>value</structfield></term>
+              <listitem><para>
+                <type>character varying(2000)</type>
+
+<para>The value of the parameter. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>conf_name</structfield></term>
+              <listitem><para>
+                <type>character varying(100)</type>
+<para>The name of the configuration to which the pair (key,value) applies. A null value means that this is the default configuration. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>date_update</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+
+<para>The date and time of the row's last update</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.files"
+               xreflabel="files">
+        <title id="table.files-title">
+         Table:
+         
+         <structname>files</structname>
+        </title>
+ <para>Maps the mail database entries to the files they were created from. Useful only for debugging or administration purposes: the files may be deleted depending on the administrator's policy.</para>
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>files</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>Unique internal identifier of the message. There is intentionally no foreign key to mail.mail_id to be able to trace import of messages with this table even after these messages have been deleted.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>filename</structfield></term>
+              <listitem><para>
+                <type>character varying(300)</type>
+
+<para>Path of the file from which the message has been imported.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+
+      </para>
+    </section>
+
+      <section id="table.filter-action"
+               xreflabel="filter_action">
+        <title id="table.filter-action-title">
+         Table:
+         
+         <structname>filter_action</structname>
+        </title>
+ 
+<para>The actions associated to conditions of the filtering system. When the condition of a filter is evaluated to true, the associated actions are applied in sequence to the message currently filtered.</para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>filter_action</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>expr_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>Expression to which the action is connected. </para>
+
+                <literal>REFERENCES</literal> <xref linkend="table.filter-expr"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>action_order</structfield></term>
+              <listitem><para>
+                <type>smallint</type>
+
+<para>Order of the action in the list of actions connected to the
+expression, starting at 1.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>action_arg</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+<para>A string that qualifies the action and whose interpretation depends on action_type.
+
+<itemizedlist>
+
+<listitem>
+<para>if action_type is 'tag', the value is a tag name. When the tag is part of a hierarchy, the full hierarchy is included in the name, with the substring '->' (dash followed by right angle bracket) as a node separator between levels (example: <literal>Newsletters->artnet monthly</literal> for a two-level hierarchy in which <literal>Newsletters</literal> is the parent and <literal>artnet monthly</literal> is the child tag)</para></listitem>
+
+<listitem><para>if action_type is 'priority', an action argument of <literal>+=x</literal> means to add x (a signed integer) to the current priority of the message, and an argument of <literal>=x</literal> means to set the message's priority to x.</para></listitem>
+
+<listitem><para>if action_type is 'status', the action argument is a substring containing letters from the list: <literal>R, A, T, D</literal>. <para>'R' means to set the read status, 'A' the archived status, 'T' is for the trashed status and 'D' means to discard the message.</para></para>
+</listitem>
+
+<listitem><para>if action_type is 'redirect', the action argument is the email address to which the message should be redirected.</para>
+</listitem>
+
+</itemizedlist>
+</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>action_type</structfield></term>
+              <listitem><para>
+                <type>character varying(100)</type>
+<para>
+The type of the action. Possible values are:
+<literal>priority</literal>, <literal>redirect</literal>, <literal>status</literal>, <literal>stop</literal>, <literal>tag</literal>.
+<para>The <literal>stop</literal> action, when encountered, stops the filtering process for the current message.</para>
+</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.filter-expr"
+               xreflabel="filter_expr">
+        <title id="table.filter-expr-title">
+         Table:
+         
+         <structname>filter_expr</structname>
+        </title>
+ 
+<para>Contains the conditions names and expressions of the filtering system. </para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>filter_expr</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>expr_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+                <literal>PRIMARY KEY</literal>
+		  <para>Unique ID for the expression.</para>
+              </para></listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>name</structfield></term>
+              <listitem><para>
+                <type>character varying(100)</type>
+
+<para>Name of the condition</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>user_lastmod</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>Id of the last user who modified the condition.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>last_update</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+<para>Date of the last update of the row. </para>
+                <literal>DEFAULT now()</literal>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>expression</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>Text of the expression. This is what is evaluated by the filtering system to compute whether the condition is true or false.
+</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>direction</structfield></term>
+              <listitem><para>
+                <type>character(1)</type>
+<para>Indicates if the filter should be used for incoming messages (direction=&apos;I&apos;), outgoing messages (direction=&apos;O&apos;) or both incoming and outgoing (direction=&apos;B&apos;). </para>
+
+                <literal>DEFAULT &apos;I&apos;::bpchar</literal>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+
+        </variablelist>
+
+        <itemizedlist>
+          <title>
+            Tables referencing filter_action via Foreign Key Constraints
+          </title>
+
+          <listitem>
+            <para>
+              <xref linkend="table.filter-action"/>
+            </para>
+          </listitem>
+
+        </itemizedlist>
+
+
+      </para>
+    </section>
+
+      <section id="table.filter-log"
+               xreflabel="filter_log">
+        <title id="table.filter-log-title">
+         Table:
+         
+         <structname>filter_log</structname>
+        </title>
+ 
+<para>Log filter hits. An entry is inserted in this table each time manitou-mdx applies a set of actions given by the  <xref linkend="table.filter-expr"/> and  <xref linkend="table.filter-action"/> tables. A message may have several entries if several filters have been applied to it but the (mail_id,expr_id) combination should be unique.</para>
+<para>The filter logs can be displayed in the user interface.</para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>filter_log</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>expr_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>The reference to the expression. It is intentional that there is no foreign key to the filter_expr table, to avoid having to delete entries in the logs when the associated filter is removed.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>The reference to the message. It is intentional that there is no foreign key to the mail table, to avoid having to delete entries in the logs when the associated message is removed.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>hit_date</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+
+<para>The date and time when the filter has been applied.</para>
+
+                <literal>DEFAULT now()</literal>
+
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+
+      </para>
+    </section>
+
+      <section id="table.header"
+               xreflabel="header">
+        <title id="table.header-title">
+         Table:
+         
+         <structname>header</structname>
+        </title>
+<para>Each mail message has a header that consists of a list of
+<literal>Name: Value</literal> lines. It is from these lines that
+information such as the subject, the recipients, the sender, or the
+date of the message are extracted.  The <literal>header</literal>
+table contains the decoded header for each message. The lines are
+unfolded, so the newline character can be seen as an effective
+separator between successive entries. The lines are also decoded so
+that they no longer contain quoted-printable or base64 contents, and
+they're converted to the database character set (UTF-8).</para>
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>header</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+Unique internal identifier of the message.
+
+                <literal>REFERENCES</literal> <xref linkend="table.mail"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>lines</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+The decoded contents of the entire header of the message. Lines are separated by newline characters (ASCII code=10).
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.identities"
+               xreflabel="identities">
+        <title id="table.identities-title">
+         Table:
+         
+         <structname>identities</structname>
+        </title>
+ 
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>identities</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>email_addr</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+                <literal>NOT NULL</literal>
+<para>the email address that will appear in the From header field and enveloppe From of outgoing messages when this identity is choosen. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>username</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>The optional full name of the account. This is typically the first and last name for a personal account, but can be anything that suits the user. If not empty, it will appear next to the email address in the From header field of outgoing messages. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>xface</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>An optional string to push into an X-Face header in outgoing mail. This is an text-encoded representation of a black and white 48x48 picture, typically of the sender's face. An <ulink url="http://www.dairiki.org/xface/">Online X-Face Converter</ulink> can help creating X-Face strings from a digitized picture. X-Faces are displayed by some mail programs such as Sylpheed, VM (emacs-based), XFMail. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>signature</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+    <para>An optional piece of text that will be appended at composition time to the body of outgoing messages. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.inverted-word-index"
+               xreflabel="inverted_word_index">
+        <title id="table.inverted-word-index-title">
+         Table:         
+         <structname>inverted_word_index</structname>
+        </title>
+ 
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>inverted_word_index</structname>
+            </title>
+
+            <varlistentry>
+              <term><structfield>word_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+                <literal>REFERENCES</literal> <xref linkend="table.words"/>
+              </para>
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>part_no</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+              </para>
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>mailvec</structfield></term>
+              <listitem><para>
+                <type>bytea</type>
+              </para>
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>nz_offset</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+              </para>
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+
+      </para>
+    </section>
+
+      <section id="table.import-mbox"
+               xreflabel="import_mbox">
+        <title id="table.import-mbox-title">
+         Table:
+         <structname>import_mbox</structname>
+        </title>
+	<para>This is a staging table with an entry for each mailbox currently being imported in a controlled way by the user interface. The actual mail contents are in <xref linkend="table.import-message" />.</para>
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>import_mbox</structname>
+            </title>
+	    <para> </para>
+            <varlistentry>
+              <term><structfield>import_id</structfield></term>
+              <listitem><para>
+                <type>serial</type>
+                <literal>PRIMARY KEY</literal>
+              </para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><structfield>tag_id</structfield></term>
+	      <listitem>
+                <type>integer</type>
+		<para>ID of the optional tag to assign to all messages from this mailbox.</para>
+	      </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><structfield>mail_status</structfield></term>
+              <listitem><type>smallint</type>
+		<para>status to apply to messages from this mailbox. The value will be copied to <link linkend= "table.mail.status">mail.status</link></para>
+            </listitem>
+          </varlistentry>
+
+	  <varlistentry>
+	    <term><structfield>apply_filters</structfield></term>
+	    <listitem><para>
+	      <type>character</type>
+	      <para>'Y' if the filters for incoming mail should be applied when importing this mailbox, 'N' or NULL otherwise.</para>
+	    </para></listitem>
+          </varlistentry>
+
+	  <varlistentry>
+	    <term><structfield>completion</structfield></term>
+	    <listitem><para>
+	      <type>real</type>
+	      <para>Completion ratio between 0 and 1.</para>
+              </para>
+            </listitem>
+          </varlistentry>
+
+	  <varlistentry>
+	    <term><structfield>status</structfield></term>
+	    <listitem><para>
+	      <type>smallint</type>
+	      <para>Status of the import. Values are 0=not started, 1=running, 2=aborted, 3=finished.</para>
+              </para>
+            </listitem>
+          </varlistentry>
+
+	  <varlistentry>
+	    <term><structfield>filename</structfield></term>
+	    <listitem><para>
+	      <type>text</type>
+	      <para>The filename of the mailbox at the client side. This is for information only. The filename is not used to process the actual import, since the contents have already been uploaded to the database.</para>
+              </para>
+            </listitem>
+          </varlistentry>
+
+	  <varlistentry>
+	    <term><structfield>auto_purge</structfield></term>
+	    <listitem><para>
+	      <type>character</type>
+	      <para>'Y' if the entries in import_mbox and import_message should be deleted immediately upon completion, 'N' otherwise. Keeping the entry lets the user interface view the import in a finished state.</para>
+              </para>
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+
+      </para>
+    </section>
+
+      <section id="table.import-message"
+               xreflabel="import_message">
+        <title id="table.import-message-title">
+         Table:
+         <structname>import_message</structname>
+        </title>
+	<para>This is a staging table with an entry for each message of each mailbox currently being imported in a controlled way by the user interface. The contents are meant to be deleted soon after the import is complete.</para>
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>import_message</structname>
+            </title>
+	    <para> </para>
+            <varlistentry>
+              <term><structfield>import_id</structfield></term>
+              <listitem><para>
+                <type>int</type>
+                <literal>REFERENCES</literal> <xref linkend="table.import-mbox"/>
+              </para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><structfield>mail_number</structfield></term>
+	      <listitem>
+                <type>integer</type>
+		<para>Number of the message in the mailbox starting from 1.</para>
+	      </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><structfield>encoded_mail</structfield></term>
+              <listitem><type>bytea</type>
+		<para>The actual message content.</para>
+            </listitem>
+          </varlistentry>
+
+	  <varlistentry>
+	    <term><structfield>apply_filters</structfield></term>
+	    <listitem><para>
+	      <type>character</type>
+	      <para>'Y' if the filters for incoming mail should be applied when importing this mailbox, 'N' or NULL otherwise.</para>
+	    </para></listitem>
+          </varlistentry>
+
+	  <varlistentry>
+	    <term><structfield>status</structfield></term>
+	    <listitem><para>
+	      <type>smallint</type>
+	      <para>Status of the import for this message. Values are 0=new, 1=imported, 2=cancelled.</para>
+              </para>
+            </listitem>
+          </varlistentry>
+
+	  <varlistentry>
+	    <term><structfield>mail_id</structfield></term>
+	    <listitem><para>
+	      <type>int</type>
+	      <para>The ID of the message once it's imported.</para>
+              </para>
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+
+      </para>
+    </section>
+
+      <section id="table.jobs-queue"
+               xreflabel="jobs_queue">
+        <title id="table.jobs-queue-title">
+         Table:
+         
+         <structname>jobs_queue</structname>
+        </title>
+ 
+<para>This table is used internally by manitou-mdx to maintain a persistent state of jobs that are scheduled for execution. Currently these jobs are related to full text indexing, mailbox imports, and outgoing mailings.</para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>jobs_queue</structname>
+            </title>
+
+            <varlistentry>
+              <term><structfield>job_id</structfield></term>
+              <listitem><para>
+                <type>serial</type>
+                <literal>NOT NULL</literal>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>job_type</structfield></term>
+              <listitem><para>
+                <type>character varying(4)</type>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+              <term><structfield>job_args</structfield></term>
+              <listitem><para>
+                <type>text</type>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+              <term><structfield>status</structfield></term>
+              <listitem><para>
+                <type>smallint</type>
+		<para>Currently this status is used for mailbox imports only. 0 means that the job is not started,  and 1 that it is running.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+
+      </para>
+    </section>
+
+      <section id="table.mail"
+               xreflabel="mail">
+        <title id="table.mail-title">
+         Table:
+         
+         <structname>mail</structname>
+        </title>
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>mail</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>The unique internal mail identifier.It is generated from the seq_mail_id sequence.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>sender</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+<para>
+The RFC822 address part extracted from the "From" address. If there are several senders (quite uncommon, but not illegal), the names are joined by a comma. The value is also arbitrarily truncated at the size of the database field (200 characters)
+</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>recipients</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+<para>The contents of the headers <literal>To:</literal> field, decoded accorded to the rfc-2047 rules.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+
+            <varlistentry>
+              <term><structfield>sender_fullname</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+
+<para>
+The RFC822 name part extracted from the "From" address. If there are several senders (quite uncommon, but not illegal), the names are joined by a comma.
+</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>subject</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+<para>The contents of the headers <literal>subject</literal> field, decoded according to the rfc-2047 rules.
+</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>msg_date</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+
+<para>The date and time at which the mail has been inserted into the database. For incoming messages, it is different from the sender_date (see below the definition of the sender_date field) The timezone is also that of the manitou system, not the sender's.
+</para>
+
+                <literal>DEFAULT now()</literal>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>sender_date</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+
+<para>The date and time at which the mail has been sent by the originator. It depends on the sender computer's date and time accuracy. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>identity_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>When not null, that field references an entry in the <xref linkend="table.identities"/> table. Incoming mails are assigned an identity depending on the configuration of manitou-mdx. For outgoing mails, the identity_id field will be set by the choice of the sender made within the user interface.
+
+ </para>
+
+
+                <literal>REFERENCES</literal> <xref linkend="table.identities"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry id="table.mail.status">
+              <term><structfield>status</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>A mask of bits that contain cumulative information about the message. The bits and the corresponding mask in hexadecimal are:
+<itemizedlist>
+<listitem>0 (0x1): Set if the message has been read.</listitem>
+<listitem>1 (0x2): Reserved. Do not use.</listitem>
+<listitem>2 (0x4): Set if a reply to the message has been made.</listitem>
+<listitem>3 (0x8): Set if the message has been forwarded.</listitem>
+<listitem>4 (0x10): Set if the message has been trashed.</listitem>
+<listitem>5 (0x20): Set if the message has been archived.</listitem>
+<listitem>6 (0x40): Set if the message is currently locked by a user for processing. Not used in current versions.</listitem>
+<listitem>7 (0x80): Set if the message is meant to be sent (and not cleared when it has actually been sent).</listitem>
+<listitem>8 (0x100): Set if the message has been sent (that is, successfully passed to the local delivery agent).</listitem>
+<listitem>9 (0x200): Set if a reply is currently being made by an operator. Not used in current versions.</listitem>
+<listitem>10 (0x400): Set if the message has been composed but not yet scheduled for sending. Not used in current versions.</listitem>
+</itemizedlist>
+</para>
+
+<para>The bits are added together. For example, a message that has been read,
+then replied to, and thus marked as archived should have its status set to
+1+4+32=37 in decimal or 0x25 in hexadecimal. A status of zero indicates a new message.
+</para>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>mod_user_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+
+<para>Internal unique ID of the person (foreign key into the users  table) that most recently processed the message (replied,forwarded,trashed,archived, or composed for an outgoing message) 
+
+ </para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>thread_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>Internal unique ID of the discussion thread if a thread is referenced and recognized in the message (by looking at the Reply-To or References header fields). Null if the message couldn't be assigned to a thread. 
+ </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>message_id</structfield></term>
+              <listitem><para>
+                <type>text</type>
+
+
+<para>The value of the Message-ID header field, truncated if necessary. 
+ </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>in_reply_to</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+
+
+
+<para>If the message is a reply to another message that also is in the mail table, then that field is a pointer to that message, by its internal unique ID (foreign key to a mail_id). Otherwise it's null.
+ </para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>date_processed</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+<para>Date and time when the message has been archived, or trashed, or replied to, or any action of processing the message.
+ </para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+
+            <varlistentry>
+              <term><structfield>priority</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>The priority of the message, as set by filter rules or by a user. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>flags</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+
+<para>A bitfield used as a cache to avoid the cost of looking up certain tables to get boolean results ("has" / "has not"). Currently, bit 0 indicates that the message has attachments and bit 1 indicates that it has a private note. Future versions will use more bits to cache more information.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>raw_size</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+
+<para>The number of bytes of the mailfile initially used to import the message.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+        <itemizedlist>
+          <title>
+            Tables referencing attachments via Foreign Key Constraints
+          </title>
+
+          <listitem>
+            <para>
+              <xref linkend="table.attachments"/>
+            </para>
+          </listitem>
+
+
+
+          <listitem>
+            <para>
+              <xref linkend="table.body"/>
+            </para>
+          </listitem>
+
+
+
+          <listitem>
+            <para>
+              <xref linkend="table.header"/>
+            </para>
+          </listitem>
+
+
+
+          <listitem>
+            <para>
+              <xref linkend="table.mail-addresses"/>
+            </para>
+          </listitem>
+
+
+
+          <listitem>
+            <para>
+              <xref linkend="table.mail-tags"/>
+            </para>
+          </listitem>
+
+
+
+          <listitem>
+            <para>
+              <xref linkend="table.notes"/>
+            </para>
+          </listitem>
+
+
+
+          <listitem>
+            <para>
+              <xref linkend="table.raw-mail"/>
+            </para>
+          </listitem>
+
+        </itemizedlist>
+
+
+
+
+
+
+      </para>
+    </section>
+
+      <section id="table.mail-addresses"
+               xreflabel="mail_addresses">
+        <title id="table.mail-addresses-title">
+         Table:
+         
+         <structname>mail_addresses</structname>
+        </title>
+ 
+<para>Contains a broken down database representation of the From, To, Cc ReplyTo, and Bcc addresses for each message. </para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>mail_addresses</structname>
+            </title>
+
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>Unique internal identifier of the message. </para>
+
+                <literal>REFERENCES</literal> <xref linkend="table.mail"/>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>addr_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>Unique internal identified of a recipient.</para>
+                <literal>REFERENCES</literal> <xref linkend="table.addresses"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>addr_type</structfield></term>
+              <listitem><para>
+                <type>smallint</type>
+
+<para>A constant integer that identifies the header where the email address is referenced. The possible values are: 
+<itemizedlist>
+<listitem><para>From: 1</para></listitem>
+<listitem><para>To: 2</para></listitem>
+<listitem><para>Cc: 3</para></listitem>
+<listitem><para>ReplyTo: 4</para></listitem>
+<listitem><para>Bcc (only for outgoing messages): 5</para></listitem>
+</itemizedlist>
+</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>addr_pos</structfield></term>
+              <listitem><para>
+                <type>smallint</type>
+<para>The position of the address (starting from 0) in the header when it contains a list of addresses. </para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+
+      <section id="table.mailing-data"
+               xreflabel="mailing_data">
+        <title id="table.mailing-data-title">
+         Table:
+         
+         <structname>mailing_data</structname>
+        </title>
+ <para>The data that corresponds to a mailing. For each mailing, there is one line per recipient, with
+all the information necessary to generate and send the message to this recipient.
+</para>
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>mailing_data</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>mailing_data_id</structfield></term>
+              <listitem><para>
+                <type>serial</type>
+
+
+                <literal>PRIMARY KEY</literal>
+
+<para>Unique identifier.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>mailing_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+
+                <literal>REFERENCES</literal> <xref linkend="table.mailing-definition"/>
+<para>The mailing to which this record is related.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>recipient_email</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>This field generally contains one mail address, but it is also permitted to have
+several addreses separated by commas</para>
+ 
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>csv_data</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>If the mailing use mailmerge, this field contains the data in CSV format separated by commas
+(regardless of the original separator from the CSV file submitted to the user interface).</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>sent</structfield></term>
+              <listitem><para>
+                <type>character(1)</type>
+<para>'Y' if the message for this recipient has been sent, NULL otherwise.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+
+      </para>
+    </section>
+
+      <section id="table.mailing-definition"
+               xreflabel="mailing_definition">
+        <title id="table.mailing-definition-title">
+         Table:
+         
+         <structname>mailing_definition</structname>
+        </title>
+ 
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>mailing_definition</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>mailing_id</structfield></term>
+              <listitem><para>
+                <type>serial</type>
+
+
+                <literal>PRIMARY KEY</literal>
+<para>Unique identifier of the mailing.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>title</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>Title of the mailing.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>sender_email</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>The email address used as the sender of the outgoing messages.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>creation_date</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+
+                <literal>DEFAULT now()</literal>
+<para>The date and time of the insertion of the mailing.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>end_date</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+<para>The date and time at which all the outgoing messages related to this mailing have been sent.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>text_template</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>The text/plain part of the body, not yet encoded for SMTP transport. It can be empty if the message format is HTML only.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>html_template</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>The html/text part of the body, not yet encoded for SMTP transport. It can be empty if the message format is text only.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>header_template</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>A model for the header of the outgoing messages, not yet encoded for SMTP transport.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>csv_columns</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>If the mailing comes with a CSV data file, this field contains a comma-separated list of the column names. Column names may be enclosed inside double quotes if necessary.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+        <itemizedlist>
+          <title>
+            Tables referencing mailing_data via Foreign Key Constraints
+          </title>
+
+          <listitem>
+            <para>
+              <xref linkend="table.mailing-data"/>
+            </para>
+          </listitem>
+
+
+
+          <listitem>
+            <para>
+              <xref linkend="table.mailing-run"/>
+            </para>
+          </listitem>
+
+        </itemizedlist>
+
+      </para>
+    </section>
+
+      <section id="table.mailing-run"
+               xreflabel="mailing_run">
+        <title id="table.mailing-run-title">
+         Table:
+         
+         <structname>mailing_run</structname>
+        </title>
+ 
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>mailing_run</structname>
+            </title>
+<para>Holds dynamic information about the mailing. The mailing batch launched by manitou-mdx updates this table on every new message being generated and sent for the mailing identified by <literal>mailing_id</literal>.</para>
+
+            <varlistentry>
+              <term><structfield>mailing_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+                <literal>REFERENCES</literal> <xref linkend="table.mailing-definition"/>
+<para>Unique identifier of the mailing.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>status</structfield></term>
+              <listitem><para>
+                <type>smallint</type>
+              </para>
+
+              <para>
+                0=not started, 1=running, 2=stopped, 3=finished
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>throughput</structfield></term>
+              <listitem><para>
+                <type>double precision</type>
+<para>The delay between two consecutive sending of messages, expressed in seconds. It is used to avoid flooding the mail subsystem.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>nb_total</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>The total number of messages for this mailing.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>nb_sent</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>The current number of messages sent for this mailing.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>last_sent</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+<para>The date and time of the last sending for this mailing.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+      </para>
+    </section>
+
+      <section id="table.mail-status"
+               xreflabel="mail_status">
+        <title id="table.mail-status-title">
+         Table:
+         
+         <structname>mail_status</structname>
+        </title>
+<para> A table automatically managed by triggers, that contains references to mail messages which are not yet archived (incoming), or not yet sent (outgoing). This table is supposed to be always relatively small and cached by the database server, so this allows to speed up queries that deal with the small subset of messages that is actually current. That is especially true for databases containing very large sets of messages. </para>
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>mail_status</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>Unique internal identifier of the message.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>status</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+The same as <literal>mail.status</literal>, except that only the values that have their bits 8 (Sent) and 5 (Archived) cleared will be found here. 
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+      </para>
+<para>Note: This table exists only for performance reasons and it's use is not encouraged except in the core of Manitou's application code. If possible, use the status field of the mail table instead.</para>
+
+<para>If parts or all of the contents of mail_status get accidentally deleted, they can be regenerated using the following SQL query:
+
+<literal>
+INSERT INTO mail_status(mail_id,status)
+ SELECT mail_id,status FROM mail
+  WHERE status&amp;32=0 AND status&amp;256=0 
+    AND mail_id NOT IN (SELECT mail_id FROM mail_status)
+</literal>
+</para>
+    </section>
+
+      <section id="table.mail-tags"
+               xreflabel="mail_tags">
+        <title id="table.mail-tags-title">
+         Table:
+         
+         <structname>mail_tags</structname>
+        </title>
+ 
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>mail_tags</structname>
+            </title>
+
+<para>Contains the mapping between the mail messages and the tags assigned to them. </para>
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>Unique internal identifier of the message.</para>
+                <literal>REFERENCES</literal> <xref linkend="table.mail"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>tag</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>Unique internal identifier of a tag.</para>
+                <literal>REFERENCES</literal> <xref linkend="table.tags"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>agent</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>Unique internal identifier of the operator or agent that assigned the tag to the mail. Generally NULL if the tag was automatically assigned by a filter rule or another automatic way. In the latter case, specific pseudo-users can also be set up as tagging agents if needed.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>date_insert</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+                <literal>DEFAULT now()</literal>
+<para>Date and time of the insertion.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+      </para>
+    </section>
+
+      <section id="table.mail-template"
+               xreflabel="mail_template">
+        <title id="table.mail-template-title">
+         Table:
+         
+         <structname>mail_template</structname>
+        </title>
+ 
+<para>This table contains pre-created messages that can be used as models when composing 
+a new mail or setting up a mailing. Templates may contain placeholders for variable text.
+</para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>mail_template</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>template_id</structfield></term>
+              <listitem><para>
+                <type>serial</type>
+<para>Unique identifier of the template.</para>
+
+                <literal>PRIMARY KEY</literal>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>title</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>The title of the template.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>body_text</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>The plain text part of the template. It can be null if the format is HTML only.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>body_html</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>The HTML text part of the template. It can be null if the format is plain text only.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>header</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>The header part of the template, not yet encoded for the mail transport. It may contain
+characters outside of the US-ASCII charset and unfolded long lines.
+Entries are separated by newlines. In a future version, the contents of this field may be added to the headers of an
+outgoing message that would have been generated from this template.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>creation_date</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+<para>The date and time at which the template was created.</para>
+                <literal>DEFAULT now()</literal>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+
+      <section id="table.mime-types"
+               xreflabel="mime_types">
+        <title id="table.mime-types-title">
+         Table:
+         
+         <structname>mime_types</structname>
+        </title>
+ 
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>mime_types</structname>
+            </title>
+
+<para>A table of MIME types and associated file suffixes</para>
+            <varlistentry>
+              <term><structfield>suffix</structfield></term>
+              <listitem><para>
+                <type>character varying(20)</type>
+
+                <literal>NOT NULL</literal>
+<para>The file suffix, without the starting dot</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>mime_type</structfield></term>
+              <listitem><para>
+                <type>character varying(100)</type>
+
+                <literal>NOT NULL</literal>
+<para>The MIME TYPE, for example <literal>text/html</literal></para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+      </para>
+    </section>
+
+      <section id="table.non-indexable-words"
+               xreflabel="non_indexable_words">
+        <title id="table.non-indexable-words-title">
+         Table:
+         
+         <structname>non_indexable_words</structname>
+        </title>
+ 
+<para>Stopwords for the full text indexer. These are words that are excluded from the index.</para>
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>non_indexable_words</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>wordtext</structfield></term>
+              <listitem><para>
+                <type>character varying(50)</type>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.notes"
+               xreflabel="notes">
+        <title id="table.notes-title">
+         Table:
+         
+         <structname>notes</structname>
+        </title>
+<para>Contains the private notes that can be attached to messages. "Private" in this context means that the notes are not exported to the outside by way of the mail transport system.
+</para> 
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>notes</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>Unique internal identifier of the message.</para>
+                <literal>REFERENCES</literal> <xref linkend="table.mail"/>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>note</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>Text of the note. It should never be empty, because the application code should delete the row when the text is cleared.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>last_changed</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+
+<para>The date and time when the note was last modified. </para>
+
+                <literal>DEFAULT now()</literal>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.programs"
+               xreflabel="programs">
+        <title id="table.programs-title">
+         Table:
+         
+         <structname>programs</structname>
+        </title>
+<para> Contains the names or paths of the programs that can be executed to display attachments.</para>
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>programs</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>program_name</structfield></term>
+              <listitem><para>
+                <type>character varying(256)</type>
+
+
+<para>The path of the program and its arguments. If should contain a $1 parameter that will be replaced by the path of the temporary file where the user interface has saved the attachment contents just before launching the program.
+Example: <literal>mozilla -remote "openfile(file:$1,new-window)"</literal> can be used on text/html attachments on a linux system with the mozilla browser installed. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>content_type</structfield></term>
+              <listitem><para>
+                <type>character varying(256)</type>
+<para>The content type for which program_name will be used.
+Example: text/html, image/jpeg, ... </para>
+             </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>conf_name</structfield></term>
+              <listitem><para>
+                <type>character varying(100)</type>
+
+<para>
+      The configuration for which the entry apply. A null value will mean that the entry applies by default. If the user interface is running under a particular configuration and that configuration has an entry for the content_type, then that entry is taken instead of the default one.
+      There are two basic reasons why programs can be specialized by configuration:
+      1) On a multi-user installation, some users may not want to use the same programs to display attachments than others: they can do so by setting up their own configuration to override the default.
+      2) An individual user can run the user interface under several operating systems, with obviously different software installed on each OS. 
+
+</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.raw-mail"
+               xreflabel="raw_mail">
+        <title id="table.raw-mail-title">
+         Table:
+         
+         <structname>raw_mail</structname>
+        </title>
+ 
+<para>This table is filled only if the store_raw_mail entry is set to true in the manitou-mdx configuration file. When it is, each incoming message is inserted in its original form as a binary large object, in addition to the other tables, mail, header, ...</para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>raw_mail</structname>
+            </title>
+
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>Unique identifier of the mail message.</para>
+                <literal>REFERENCES</literal> <xref linkend="table.mail"/>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>mail_text</structfield></term>
+              <listitem><para>
+                <type>oid</type>
+
+<para>The large object identifier pointing to the raw pristine contents of the mail message.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.runtime-info"
+               xreflabel="runtime_info">
+        <title id="table.runtime-info-title">
+         Table:
+         
+         <structname>runtime_info</structname>
+        </title>
+ <para>Contains (key, values) string pairs that contain runtime information about the mail-database exchanger (manitou-mdx). These information can be used to monitor the process activity (or lack thereof) from the outside. </para>
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>runtime_info</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>rt_key</structfield></term>
+              <listitem><para>
+                <type>character varying(100)</type>
+
+                <literal>NOT NULL</literal>
+<para>The name of the runtime variable. </para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>rt_value</structfield></term>
+              <listitem><para>
+                <type>character varying(1000)</type>
+
+<para>The value of the runtime variable. </para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+
+<para>
+<table><title>List of runtime variables</title>
+<tgroup cols="2">
+ <colspec colnum="1"/>
+ <colspec colnum="2"/>
+<thead>
+<row>
+<entry>Field name</entry>
+<entry>Field value</entry>
+</row>
+</thead>
+
+<tbody>
+<row>
+<entry>
+   <structfield>last_alive</structfield>
+</entry>
+<entry>
+   <para>The last time the exchanger signalled that it was running. By default, this entry is updated every five minutes. The format is an UTC timestamp.</para>
+</entry>
+</row>
+
+<row>
+<entry>
+   <structfield>last_import</structfield>
+</entry>
+<entry>
+   <para>The last time a mail has been imported from the spool (MANITOU_MAILFILES_DIR). The format is an UTC timestamp.</para>
+</entry>
+</row>
+
+<row>
+<entry>
+   <structfield>last_error</structfield>
+</entry>
+<entry>
+   <para>The last time an error has occurred in importing a mail from the spool. Errors in importing are likely to be due to an incorrect format for a mail file. The format is an UTC timestamp.</para>
+</entry>
+</row>
+
+
+<row>
+<entry>
+   <structfield>nb_errors</structfield>
+</entry>
+<entry>
+   <para>The number of errors in importing mail files that occurred since that number was resetted to zero. Typically an administrator would look from time to time to mailfiles that caused errors and reset that counter once the cause of the error has been spotted and the incorrect file ignored or fixed and re-imported.</para>
+</entry>
+</row>
+
+</tbody>
+</tgroup>
+</table>
+
+
+</para>
+    </section>
+
+      <section id="table.tags"
+               xreflabel="tags">
+        <title id="table.tags-title">
+         Table:
+         
+         <structname>tags</structname>
+        </title>
+ 
+<para>Contains the tags definitions.</para>
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>tags</structname>
+            </title>
+
+            <varlistentry>
+              <term><structfield>tag_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>The unique internal ID of the tag</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>name</structfield></term>
+              <listitem><para>
+                <type>character varying(300)</type>
+<para>The name of the tag. </para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>parent_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>The tag_id of the parent, for a child tag. Null if the tag is at the root level. </para>
+
+                <literal>REFERENCES</literal> <xref linkend="table.tags"/>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+        <itemizedlist>
+          <title>
+            Tables referencing tags via Foreign Key Constraints
+          </title>
+
+          <listitem>
+            <para>
+              <xref linkend="table.mail-tags"/>
+            </para>
+          </listitem>
+
+
+
+          <listitem>
+            <para>
+              <xref linkend="table.tags"/>
+            </para>
+          </listitem>
+
+
+
+          <listitem>
+            <para>
+              <xref linkend="table.tags-words"/>
+            </para>
+          </listitem>
+
+        </itemizedlist>
+
+      </para>
+    </section>
+
+      <section id="table.tags-words"
+               xreflabel="tags_words">
+        <title id="table.tags-words-title">
+         Table:
+         
+         <structname>tags_words</structname>
+        </title>
+ 
+<para>Contains the association between tags and words. Not used by default, by can be used for the bayesian auto-classification.</para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>tags_words</structname>
+            </title>
+
+            <varlistentry>
+              <term><structfield>tag_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>The unique identifier of the tag.</para>
+                <literal>REFERENCES</literal> <xref linkend="table.tags"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>word_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>The unique identified of the word.</para>
+
+                <literal>REFERENCES</literal> <xref linkend="table.words"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>counter</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>The number of times the words <literal>word</literal> is associated with the tag <literal>tag_id</literal>.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.user-queries"
+               xreflabel="user_queries">
+        <title id="table.user-queries-title">
+         Table:
+         
+         <structname>user_queries</structname>
+        </title>
+ 
+<para>This table contains the user-defined queries that are runnable in the user interface.</para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>user_queries</structname>
+            </title>
+
+            <varlistentry>
+              <term><structfield>title</structfield></term>
+              <listitem><para>
+                <type>character varying(100)</type>
+
+                <literal>NOT NULL</literal>
+		<para>User-defined title of the query</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>sql_stmt</structfield></term>
+              <listitem><para>
+                <type>text</type>
+		<para>The SQL statement as defined by the user.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.users"
+               xreflabel="users">
+        <title id="table.users-title">
+         Table:
+         
+         <structname>users</structname>
+        </title>
+ 
+	<para>The users of the database.</para>
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>users</structname>
+            </title>
+
+            <varlistentry>
+              <term><structfield>user_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+                <literal>PRIMARY KEY</literal>
+		<para>Unique identifier. The value must be greater than 0.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>fullname</structfield></term>
+              <listitem><para>
+                <type>character varying(300)</type>
+		<para>User name.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>login</structfield></term>
+              <listitem><para>
+                <type>character varying(80)</type>
+		<para>User login. It must match the login used to connect to the database, and has to be unique.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>email</structfield></term>
+              <listitem><para>
+                <type>text</type>
+		<para>An optional email address of the operator. The contents of this field can be used in a dynamic signature for outgoing messages.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>custom_field1</structfield></term>
+              <listitem><para>
+                <type>text</type>
+		<para>A custom field whose semantic value is left to the administrator. The contents of this field can be used in a dynamic signature for outgoing messages.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>custom_field2</structfield></term>
+              <listitem><para>
+                <type>text</type>
+		<para>A second custom field whose semantic value is left to the administrator. The contents of this field can be used in a dynamic signature for outgoing messages.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+            <varlistentry>
+              <term><structfield>custom_field3</structfield></term>
+              <listitem><para>
+                <type>text</type>
+		<para>A third custom field whose semantic value is left to the administrator. The contents of this field can be used in a dynamic signature for outgoing messages.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+      <section id="table.words"
+               xreflabel="words">
+        <title id="table.words-title">
+         Table:
+         
+         <structname>words</structname>
+        </title>
+ 
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>words</structname>
+            </title>
+	    <para>The dictionary used by the full text indexer.</para>
+
+            <varlistentry>
+              <term><structfield>word_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+                <literal>PRIMARY KEY</literal>
+		<para>Unique identifier.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>wordtext</structfield></term>
+              <listitem><para>
+                <type>character varying(50)</type>
+<para>The word itself.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+
+        <itemizedlist>
+          <title>
+            Tables referencing inverted_word_index via Foreign Key Constraints
+          </title>
+
+          <listitem>
+            <para>
+              <xref linkend="table.inverted-word-index"/>
+            </para>
+          </listitem>
+
+
+
+          <listitem>
+            <para>
+              <xref linkend="table.tags-words"/>
+            </para>
+          </listitem>
+
+        </itemizedlist>
+
+      </para>
+    </section>
+
+
+  </chapter>
+

@@ -1,0 +1,79 @@
+h1.title { 
+  background: url(img/manitou-logo.png) no-repeat left;
+  padding: 25px 0px 10px 60px;
+  margin: 0;
+}
+
+.guimenuitem {
+  background-color: rgb(249,234,243);
+  padding: 2px;
+}
+
+.literallayout { 
+  border: 1px dashed;
+  padding-left: 0.4em;
+  padding-top: -8px;
+}
+
+.programlisting {
+  background-color: ivory;
+  border: 1px dashed;
+  padding: 4px;
+  position: relative;
+  left: 2em;
+  margin-right: 10%;
+  overflow: auto;
+}
+
+div.literallayout { 
+  font-family: monospace;
+  margin: 0;
+}
+
+.table-contents table { 
+ border-collapse: collapse;
+}
+
+.table-contents table td, .table-contents table th { 
+  border: 1px solid black;
+  padding: 3px;
+}
+
+div.caption { 
+  font-size: 80%;
+  margin-left: 1em;
+}
+
+dd { 
+  margin-bottom: 1em;
+}
+
+body { 
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+div.navfooter, div.navheader a {
+  font-size: 80%;
+}
+
+span.sect1 {
+    margin-bottom: 0px;
+}
+
+span.sect2 a {
+    margin-top: -4px;
+/*    background-color: grey;*/
+}
+
+div.toc dd {
+   margin: 0px 2em;
+}
+
+div.toc dd dl {
+   margin: 2px;
+}
+
+div.toc dl dt span.chapter {
+    display: block;
+    margin-top: 1em;
+}

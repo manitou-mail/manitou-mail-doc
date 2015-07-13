@@ -1,0 +1,1460 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+
+<chapter id="ui.invocation">
+<title>Invocation</title>
+<sect2>
+<title>Without arguments</title>
+
+<para>The user interface first has to connect to an existing mail database.
+Either the connection parameters are given on the command line, or
+the program will display this dialog window:
+
+<screenshot>
+<mediaobject>
+<imageobject><imagedata fileref="img/login.png" align="center" /></imageobject>
+<caption><para>Startup window when no connection parameters are passed</para></caption>
+</mediaobject>
+</screenshot>
+
+Fields left empty in this window get default values provided by
+the PostgreSQL client-API:
+<itemizedlist>
+<listitem><para>Database name: login name of the current user (as logged to the operating system).</para></listitem>
+<listitem><para>Login: also the login name of the current user.</para></listitem>
+<listitem><para>Password: empty.</para></listitem>
+<listitem><para>Host: empty, which means connect locally to an unix domain socket on Unix, or localhost on MS-Windows.</para></listitem>
+<listitem><para>More parameters: empty.</para></listitem>
+</itemizedlist>
+These defaults can themselves be overriden with some PostgreSQL specific
+environment variables, such as PGHOST, PGUSER or PGPORT.
+</para>
+
+<para>When the connection is successful, the parameters (except the
+password) are stored locally, and recalled automatically on the next
+invocation, so that only the password has to be typed again.</para>
+
+</sect2>
+
+<sect2>
+<title>Command line arguments</title>
+<para>Options are specified on the command line with the syntax: <literal>--option1=value1 --option2=value2 ...</literal>.
+The accepted options are:
+
+<itemizedlist>
+  <listitem><para>--dbcnx: a list of space-separated <code>name=value</code> parameters, all grouped in one string (under a shell, the string should be enclosed in simple
+  or double quotes if it contains spaces).The more common parameters
+  are <literal>user</literal>, <literal>password</literal>, <literal>host</literal>, <literal>port</literal>, and <literal>dbname</literal>.
+<informalexample>For example: <screen>manitou --dbcnx="dbname=mail user=joe host=pgserver"</screen></informalexample>
+  </para></listitem>
+
+
+<listitem><para>--config: a configuration's name. This option is necessary only to use different configurations on the same database from the same desktop machine. See the <link linkend="ui.configurations">user interface configurations</link>
+for more.</para></listitem>
+
+<listitem><para>--debug-output: an integer debug level between 1 and 10. Useful only for developers.</para></listitem>
+
+</itemizedlist>
+</para>
+
+</sect2>
+</chapter>
+
+<chapter id="ui.display">
+<title>Main display</title>
+<sect1 id="display-panels">
+<title>Panels</title>
+
+<screenshot>
+<mediaobject>
+<imageobject><imagedata align="center" fileref="img/main-panels.png" /></imageobject>
+<caption>The 4 main panels</caption>
+</mediaobject>
+</screenshot>
+
+<para>
+The main window is divided into four panels, as numbered in the screenshot above.
+<itemizedlist>
+<listitem>1: the quick selection panel contains a tree view that provides one-click access to dynamic lists of messages.</listitem>
+<listitem>2: the current list of messages, or results list, typically obtained by clicking on an item in the quick selection panel or by the <guimenuitem>Selection->New query</guimenuitem> command.</listitem>
+<listitem>3: the contents of the message that is currently selected, if any.</listitem>
+<listitem>4: the tags panel, to add or remove tags from the currently selected messages. If not needed, it can be hidden by unchecking <guimenuitem>Display->Tags panel</guimenuitem> in the menu bar.</listitem>
+</itemizedlist>
+</para>
+
+</sect1>
+
+<sect1 id="ui.quicksel">
+<title>The quick selection panel</title>
+<para>
+This panel is laid out as a tree structure. Each leaf
+is internally associated to a query; when the user selects a tree item,
+the associated query is run, and a new page is shown with the resulting list of messages.
+Each leaf is a <emphasis>selector</emphasis>.
+</para>
+
+<para>
+<screenshot>
+<mediaobject>
+<imageobject><imagedata fileref="img/quicksel.png" /></imageobject>
+<caption>The quick selection panel</caption>
+</mediaobject>
+</screenshot>
+</para>
+
+<para>
+The numbers inside parentheses represent the estimated number of messages matched by the selector. Bold text indicates that some of them are unread. Within the branch of current messages, when there are two numbers separated by a &lt; (left than) sign, the one at the left is a count of current messages, and the one at the right is a count of unread messages. For example, in the screenshot, the branch <literal>Current messages->Tagged->qt-interest</literal> has 39 current messages, including 28 unread.
+</para>
+
+<para>
+The built-in branches are:
+<itemizedlist>
+<listitem><para><literal>Unread messages->All</literal>: messages that have never been read.</para></listitem>
+<listitem><para><literal>Current messages</literal> groups selectors for non-archived messages. These are messages that need to be acted upon in a near future. Current is a synonym for "non-archived" or "not yet processed".</para></listitem>
+<listitem><para><literal>Current messages->Tagged</literal>: messages to which a tag has been assigned. Each tag for which there is at least one current message is displayed in this branch. When tags are part of a hierarchy, the hierarchy is displayed as flattened text in a single line, with a right arrow representing the parent->child relationship.</para></listitem>
+
+<listitem><para><literal>Current messages->Prioritized</literal>: messages that are curent and have a priority field whose value is greater or equal than 1.</para></listitem>
+<listitem><para><literal>Current messages->Not tagged</literal>: messages to which no tag has been assigned.</para></listitem>
+
+<listitem><para><literal>Archived tagged mail</literal>: messages that have a least one tag assigned to them, and have been archived. There are no counters computed for these leafs for performance reason, since it is expected that the number of archived messages may be huge.  </para></listitem>
+
+<listitem><para><literal>Sent mail</literal>: messages that have their status "sent" flag set to "Yes".</para></listitem>
+<listitem><para><literal>Trashcan</literal>: messages that have their status "trashed" flag set to "Yes".</para></listitem>
+<listitem><para><literal>User queries</literal>: queries that have been saved in the Query Selection by the <guimenuitem>Selection->Save Query</guimenuitem> command or set up by an administrator. Every built-in selector mentioned above could also have been created as a query with the corresponding SQL statement.</para></listitem>
+
+</itemizedlist>
+</para>
+
+<important>
+Contrary to folders in traditional mail programs, selectors aren't
+necessarily mutually exclusive. In particular, new messages are also
+current, and the <literal>All</literal> selector will obviously include the results of the more specialized <literal>Prioritized</literal>, or <literal>Not tagged</literal> selectors.
+</important>
+
+
+</sect1>
+
+<sect1 id="results-list">
+<title>The results list</title>
+<para>
+The list can display the following message fields:
+subject, sender, status (icon), priority, attachment (icon), note (icon), and date.
+The messages are grouped by threads (also called conversations) unless <guimenuitem>Display->Threaded</guimenuitem> is unchecked.
+</para>
+Columns can be removed by unchecking their name in the popup that appears when right-clicking on the header titles.
+They can also be moved by sliding their titles right or left with the mouse (while keeping the mouse button pressed).
+Clicking on a column title also sorts the list by that column (if threading display is enabled, messages belonging to the same thread are still grouped together).
+The positions and sizes of the columns are saved in the database in the current configuration by the <guimenuitem>Display->Store settings</guimenuitem> command.
+
+<para><xref linkend="table-status-icons" /> lists the icons that can be displayed in the messages list.
+
+<table id="table-status-icons">
+<title>Status icons</title>
+  <tgroup cols="2">
+<tbody>
+  <row><entry><inlinemediaobject><imageobject><imagedata fileref="img/status_new.png" /></imageobject></inlinemediaobject></entry>
+    <entry>New message (unread)</entry>
+  </row>
+  <row><entry><inlinemediaobject><imageobject><imagedata fileref="img/status_read.png" /></imageobject></inlinemediaobject></entry>
+    <entry>Message read, but not yet processed</entry>
+  </row>
+  <row><entry><inlinemediaobject><imageobject><imagedata fileref="img/status_processed.png" /></imageobject></inlinemediaobject></entry>
+    <entry>Archived message (processed)</entry>
+  </row>
+  <row><entry><inlinemediaobject><imageobject><imagedata fileref="img/status_replied.png" /></imageobject></inlinemediaobject></entry>
+    <entry>The message has been replied to (processed)</entry>
+  </row>
+  <row><entry><inlinemediaobject><imageobject><imagedata fileref="img/status_forwarded.png" /></imageobject></inlinemediaobject></entry>
+    <entry>The message has been forwarded</entry>
+  </row>
+  <row><entry><inlinemediaobject><imageobject><imagedata fileref="img/status_trashed.png" /></imageobject></inlinemediaobject></entry>
+    <entry>The message has been moved to the trash can</entry>
+  </row>
+  <row><entry><inlinemediaobject><imageobject><imagedata fileref="img/status_sent.png" /></imageobject></inlinemediaobject></entry>
+    <entry>The message has been sent</entry>
+  </row>
+  <row><entry><inlinemediaobject><imageobject><imagedata fileref="img/status_pending.png" /></imageobject></inlinemediaobject></entry>
+    <entry>The message is waiting to be sent (transient state)</entry>
+  </row>
+</tbody>
+</tgroup>
+</table>
+</para>
+</sect1>
+
+<sect1 id="windows-and-pages">
+<title>Windows and pages</title>
+<sect3>
+<title>Pages</title>
+<para>
+The interface displays lists of messages in pages between which the user can navigate with Move back and Move forward commands (bound to alt-left and alt-right keys), like in a web browser. When a new set of results is requested, a new page is opened, replacing the list of messages previously on screen. Other pages can be instantly displayed back on screen by moving through pages, back and forward.
+</para>
+
+<para>
+These commands are meant to let the user navigate rapidly through lists of messages.
+Example: a message currently on screen is from john.doe@domain.tld.
+The user right clicks on the subject line and choose the Last 10 messages from john.doe@domain.tld command.
+The program then opens a new page with the results.
+The user wades through the results, and when done, comes back to the previous page by issuing <guimenuitem>Move back</guimenuitem>.
+The display and selection will then be restored as they were before the Last 10 messages... command was issued.
+</para>
+
+<para>
+The number of pages that are kept in memory is a configuration parameter named "msg_window_pages" which defaults to 5. It means that when a new page is opened while there are already five result pages in memory, the older page (number 1) is removed from the memory to get room for the new one. The page number 2 becomes number 1, 3 becomes 2, and so on.
+</para>
+
+<para>
+When a new page is opened while there are other pages after it, the new page becomes the tail of the pages list, which means that the pages that were after can no longer be accessed with the <guimenuitem>Move forward</guimenuitem> command. This matches web browsers behavior.
+</para>
+</sect3>
+
+<sect3>
+<title>Windows</title>
+<para>
+A new window with an entirely new set of pages (initially blank) can be opened with the <guimenuitem>File->New window</guimenuitem> command. Different windows are manipulated completely independently from each other, except that when several windows show the same message, a status change or a deletion of that message is visually propagated to all windows.
+</para>
+</sect3>
+</sect1>
+
+</chapter>
+
+<chapter id="ui.configurations">
+<title>Configurations</title>
+<para>
+A configuration at the user interface level is a set of settings
+grouped inside the database under a common name. 
+The settings are related to the display and user
+preferences in general.
+</para>
+<para>
+The contents of a configuration are written both by the <guimenuitem>Display->Store
+settings</guimenuitem> command and the preferences dialog.
+When manitou is launched without the <literal> --config</literal> parameter specifying what configuration to use, it chooses its configuration name by
+combining the hostname and the operating system name of the machine it runs on
+(for example: <literal>myhost-linux</literal>).
+</para>
+<para>In order to use the same configuration on different
+workstations, or for several users to share the same workstation but with
+different configurations , the --config option has to be used.
+Under MS-Windows, the operating system name is <literal>windows</literal>, no matter
+the version and flavour.
+</para>
+
+<para>
+The configuration's name can only be chosen at application launch. To
+operate under a different configuration, the user must restart the
+program. Note that it does not affect user identities (the From fields of messages being composed): any
+identity  can be selected when composing a message, independantly of the current configuration.
+</para>
+</chapter>
+
+
+<chapter id="ui.wordsearch">
+<title>Full text search</title>
+<para>
+By default, the bodies of messages and certain attachments are indexed
+to enable fast word searches through the entire
+database.
+This global search is invoked from the search toolbar:
+<screenshot>
+<mediaobject>
+<imageobject><imagedata fileref="img/wordsearch.png" /></imageobject>
+<caption><para>Search box</para></caption>
+</mediaobject>
+</screenshot>
+When hitting the Enter key or pressing the Find button, all messages
+that match the search terms are retrieved and displayed in a new
+results page.
+Also the searched words are highlighted on screen within the body of
+messages, until the user clears the search box input field.
+</para>
+
+<para>
+The search is <emphasis role="bold">case insensitive</emphasis> and will
+ignore words containing only one or two characters, or more than 50, or that are
+declared as stopwords in the database.
+Email addresses can be searched directly, by typing them in full or in
+part (domain name or part of domain-name, first name, lastname)
+Compound words can be search in full or by one of their components, if
+longer than two characters.
+</para>
+
+<para>
+Searching for exact sentences including space or punctuation is
+done by enclosing the sentence inside double-quotes.
+See also the substring search capabilities of the Query command
+(<guimenuitem>Selection->New Query</guimenuitem>).
+</para>
+
+<para>Accents can be ignored in search in order to find words whose accents or
+diacritic marks may lack or differ across messages.
+This behavior can be controlled with the "Accents &amp; diacritics marks"
+setting from the Preferences Search tab.
+
+A specific search can always override this choice by including the dedicated operator:
+<indexterm><primary>accents</primary><secondary>operator</secondary></indexterm>
+<literal>accents:insensitive</literal> in the search expression, or its abbreviation <literal>accents:i</literal>.
+Conversely, an exact match on accents can be required by specifying <literal>accents:sensitive</literal> or the shorter equivalent <literal>accents:s</literal>.
+
+The unaccented search feature also depends on the full-text indexer
+settings (see <xref linkend="server.config" />), but it is enabled by default.
+
+</para>
+
+
+<para> Results can also be filtered out by specifying words that must
+not appear in the searched messages. To exclude a word from the search, a minus sign (dash) is added before that word.
+
+Example:
+<literal>tennis mary -pierce</literal> will retrieve messages that contain the words tennis and mary and <emphasis>do not contain</emphasis> pierce.
+</para>
+
+</chapter>
+
+<chapter id="ui.tags">
+<title>Tags</title>
+<para>
+Tags are user-defined labels than can be assigned to messages in order
+to categorize them and retrieve them later on.
+A message can be marked with several tags simultaneously (that's
+an advantage over traditional mail folders).
+
+Tags can also be organized in a hierarchical tree-like structure.
+</para>
+<sect1 id="tags-list">
+<title>Managing the list of tags</title>
+<para>
+The <guimenuitem>File->Tags</guimenuitem> command opens a non-modal
+dialog window as shown in the snapshot below:
+<screenshot>
+<mediaobject>
+<imageobject><imagedata fileref="img/tagsdialog.png" align="center" /></imageobject>
+<caption><para>Tags editor window</para></caption>
+</mediaobject>
+</screenshot>
+</para>
+<para>
+Tags can be renamed in place by double-clicking on their name or pressing
+F2 on a selected entry or pressing the "Edit" button.
+</para>
+
+<para>
+To create a new tag a level below another in the hierarchy, the "New" button must be used when the parent tag is selected. Entire branches or individual entries can be moved along the hierarchy by using "Drag&amp;Drop". The branch must be dropped to the parent tag, or the special (Root) entry for a top-level tag.
+</para>
+
+<para>
+The fact that a tag is a branch (a parent of other tags) does not mean
+that it cannot be assigned to messages. For example, considering the
+branch "Mailing lists->debian-user", a user can decide to assign only
+the "debian-user" tags, or both "Mailing lists" and "debian-user"
+tags to messages that come from this list.
+</para>
+
+</sect1>
+
+<sect1 id="assign-tags">
+<title>Assigning tags to messages</title>
+<para>
+The tags panel should be open (using the <guimenuitem>Display->Tags</guimenuitem>
+command if necessary). At the bottom left of the window is a tree-like
+tags structure with checkboxes. Selected tags appear checked and
+in orange/red color, as shown in the pictures below:
+</para>
+</sect1>
+
+<sect1 id="automatic-tags-assignment">
+<title>Automatic assignment</title>
+<sect3><title>When replying</title>
+<para>
+When replying to a message, the default behavior is to assign to the reply
+the same tags as the incoming message. This can be turned off with
+the <literal>reply_copy_tags</literal> config entry.
+</para>
+</sect3>
+
+<sect3><title>By filter rules</title>
+<para>
+Incoming mail is checked against rules when defined. One of the most
+common use of actions connected to rules is to automatically apply
+tags to the incoming messages, by matching particular 
+headers against predefined values.
+</para>
+</sect3>
+</sect1>
+</chapter>
+
+<chapter id="ui.query-form">
+<title>The query form</title>
+<para>
+The <guimenuitem>Selection->New query</guimenuitem> command opens a non-modal dialog window that allows the user to specify search criteria, as shown below:
+<screenshot>
+<mediaobject>
+<imageobject><imagedata fileref="img/query-form.png" align="center" /></imageobject>
+<caption><para>Query form</para></caption>
+</mediaobject>
+</screenshot>
+</para>
+
+<para> The user should fill in one or several fields with values
+against which the database contents will be tested. When OK is
+pressed, the program generates a query based on the non-empty fields
+(they're combined with a logical AND, therefore for a particular
+message to be retrieved, it has to match all the submitted
+criteria). Then it runs the query and on completion, create a new page
+of results in the window from which the command has been
+called. </para>
+
+<sect1 id="search-fields">
+<title>Fields</title>
+<sect3>
+<title>From/To/Cc/Any</title>
+<para>An email address is expected. You may type only a part of the address and hit the space bar to autocomplete: a list of addresses containing the substring typed will then be fetched and shown in the combobox. Any means that the messages to retrieve must have that address either in a From, To, or Cc field. 
+</para>
+</sect3>
+
+<sect3><title>Dates between</title>
+<para>The date format expected is YYYY/MM/DD (US style) or
+DD/MM/YYYY (european style) depending on the current preferences.
+One of the minimum (lower bound) or maximum (upper bound) can be omitted
+to select an semi-open interval of dates.
+</para>
+</sect3>
+
+<sect3><title>Not older than</title>
+<para>Use this field to retrieve only the more recent messages,
+with "recent" expressed as a number of days, or weeks, or months back from now.
+</para>
+</sect3>
+
+<sect3><title>To</title>
+<para>an email address is expected, and autocompletion is available by
+hitting the space bar, as for the From/To/Cc/Any input field.
+</para>
+</sect3>
+
+<sect3><title>Subject</title>
+<para> a substring that the message subject must contain.
+The search will be case insensitive.</para>
+</sect3>
+
+<sect3><title>Contains</title>
+<para>a substring that the message body must contain. Be aware
+that the search is case sensitive.
+</para></sect3>
+
+<sect3><title>SQL statement</title>
+<para>This field should be used by users who know SQL and the Manitou-Mail
+database schema.
+The input has to be a sql statement that
+returns a list of mail_id. Example:
+<screen> SELECT mail_id FROM attachments
+WHERE content_type like 'image/jpeg' and content_size>1024*1024</screen>
+(that query will retrieve any message to which a big jpeg image has
+been attached).
+As with any other field of the query dialog, the result of that query
+will be ANDed with the other criteria.
+</para>
+</sect3>
+
+<sect3><title>Contains tag</title>
+<para>The combobox lists all available tags. Selecting a tag
+will constrain the messages retrieved to those to which that tag is assigned.
+The hierarchy of tags is flattened so that child tags are expressed
+as parent_tag->child_tag
+</para>
+</sect3>
+
+<sect3><title>Status</title>
+<para>Pressing the "More..." button will display a panel of
+all possible status combinations, with "Yes","No" and "Either" choices
+for each one. The status is a set of boolean properties (properties
+that can be true or false)
+</para>
+
+<itemizedlist>
+<listitem><para>"Either" means no test will be performed on the corresponding property.</para></listitem>
+<listitem><para>"Yes" means the corresponding property has to be true.</para></listitem>
+<listitem><para>"No" means the corresponding property has to be false.</para></listitem>
+</itemizedlist>
+
+<para>For example, choosing "No" for "Replied", and "No" for
+"Forwarded", and "Yes" to "Processed", means you want to constrain the
+messages to retrieve to those that have been marked as processed, but
+for which no reply has been issued, and that haven't been forwarded as
+well.
+</para>
+</sect3>
+
+<sect3><title>Limit To</title>
+<para>An integral number is expected in this field. It
+will limit the number of messages fetched from the database to this
+value, even if there are more messages that match the criteria
+entered.
+</para>
+<para>
+It is intended to avoid cluttering the network and/or
+your computer if the query hasn't been narrowed enough to retrieve a
+reasonable number of messages. Several thousands of messages to fetch
+in one go is still reasonable, but millions of messages is not (it
+actually depends on the throughput of the link with the database and
+the power of the computer running manitou-mail user's interface, though).
+</para>
+</sect3>
+
+<sect3><title>In trash</title>
+<para>Only messages that are trashed will be retrieved.</para>
+</sect3>
+</sect1>
+
+<sect1 id="refining-queries">
+<title>Refining queries</title>
+<para>Sometimes a search has to be modified several times before
+giving satisfactory results. After results are shown, the
+<guimenuitem>Selection->Modify</guimenuitem> query command may be used
+to reopen the query selection dialog, with the criteria already set
+and ready to be modified.</para> </sect1>
+
+
+<sect1 id="refreshing-results">
+<title>Refreshing results</title>
+<para>Queries retrieve messages that match criteria at the time
+they're run. Since new messages come into the database independently
+of the user interface, it is possible to explicitly run again the
+query and have those new messages added to the current list. This is
+done with the <guimenuitem>Selection->Refresh</guimenuitem> command or
+the F5 key. Note that messages in the current list that no longer
+match the query are not removed from the list. </para>
+
+<para>
+Built-in selections "New->All" and "Current->All" can also be automatically and periodically refreshed based on the setting on a Preferences parameter (Check new mail every X minutes). When this parameter is set and new messages are available, an icon with a number of messages gets displayed in a button at the bottom right in the status bar and a message "New mail is availaible" is left at the bottom left.
+</para>
+
+<para>
+Clicking on the button will add the new messages to the current list (actually a refresh command will be issued, which should have the same effect except if you're in a multi-user environment and another user has already changed the messages so that they no longer match the "new" or "current" criteria).
+</para>
+</sect1>
+
+<sect1 id="search.save">
+<title>Saving search criteria</title>
+<para>
+When query definitions are saved, they appear in the "User queries" branch of the quick selection panel. Use the <guimenuitem>Selection->Save query</guimenuitem> command to save a query. The associated SQL sentence will be shown, and a query name will be asked for.
+</para>
+</sect1>
+</chapter>
+
+<chapter id="ui.attachments">
+<title>Attachments</title>
+<para>
+Attachments are shown in a panel at the bottom of the message's body. Attachments of type 'text/plain' with no filename are directly shown in the body as well as in the list.
+<screenshot>
+<mediaobject>
+<imageobject><imagedata fileref="img/attachments.png" align="center" /></imageobject>
+<caption><para>Attachments panel</para></caption>
+</mediaobject>
+</screenshot>
+</para>
+
+<sect1 id="attachments.save">
+<title>Saving attachments</title>
+<para>
+Select the files to be saved (multi-selection is possible) in the attachments list and use the <guimenuitem>Message->Attachment->Save</guimenuitem> command.
+If several attachments are selected, a directory selector will appear. If only one attachment is selected, a filename and path selector will appear, so that it's possible to change the name of the file being saved.
+For each attachment with no predefined filename, the application will prompt for a filename before saving.
+</para>
+</sect1>
+
+<sect1 id="attachments.view">
+<title>Viewing attachments with a helper program</title>
+<para>
+MIME types can be associated with an external program to be viewed. This is done in the database with the <literal>programs</literal> table.
+</para>
+<para>
+File extensions may be associated to programs through the operating system.
+When an attached file has an extension registered in the system, the contextual menu on that attachment has an <guimenuitem>Open with: name of program</guimenuitem> entry.
+Also when double-clicking on the attachment, an <guimenuitem>Open or Save</guimenuitem> choice is proposed in a intermediate dialog box.
+Currently this association between file extensions and programs is only checked on the Windows platform.
+</para>
+</sect1>
+
+<sect1 id="attachments.view.astext">
+<title>Viewing attachments as text</title>
+<para>
+Select one attachment and use the <guimenuitem>Message/Attachment/View as text</guimenuitem> command. It will open a non-modal window that shows the attachment contents as raw text. Attachments of type text/plain with a character set will be decoded to be displayed properly. 
+</para>
+</sect1>
+
+</chapter>
+
+<chapter id="ui.message-notes">
+<title>Message notes</title>
+<para>
+Each message can have a private text note attached to it. Notes can be viewed and edited within the user interface, by any user. They're kept private to the database (aren't included if the message gets forwarded, for instance).
+</para>
+
+<para>A common use of notes is to attach comments or reminders to the incoming mail.</para>
+
+<para>It is also possible to use them on pending outgoing messages as an "off channel" communication mean between users, when several people have to write or acknowledge a common reply before the actual sending.</para>
+
+<para>When a note is attached to a message, an entry is shown in the
+attachments view, with an "Internal note" type where the mime type
+would be for a normal mail attachment, as shown in the picture below:
+<screenshot>
+<mediaobject>
+<imageobject><imagedata fileref="img/notelist.png" align="center" /></imageobject>
+<caption><para>Private note</para></caption>
+</mediaobject>
+</screenshot>
+</para>
+
+<sect1 id="note.add">
+<title>Adding or updating a note</title>
+<para>
+Use the <guimenuitem>Message->Edit Note</guimenuitem> command while the message is selected or being composed, or double-click on its line in the attachments view. This will open a non-modal dialog window looking like the picture below:
+<screenshot>
+<mediaobject>
+<imageobject><imagedata fileref="img/privnote.png" align="center" /></imageobject>
+<caption><para>Editing a private note</para></caption>
+</mediaobject>
+</screenshot>
+</para>
+</sect1>
+
+<sect1 id="note.delete">
+<title>Deleting a note</title>
+
+<para>
+Deleting the whole text of the note has the effect of removing
+it, as hitting the <literal>Del</literal> key when the note is
+selected in the attachments view.
+</para>
+
+</sect1>
+</chapter>
+
+
+<chapter id="ui.filter-editor">
+<title>Filter editor</title>
+<para>
+Filter rules get applied to messages upon sending or receiving.
+Each filter has a match condition and a list of ordered actions that are
+automatically applied server-side when the condition is met.
+Condition expressions yield a boolean result and are written much like in a programming language, with operators, function calls, the logical connectors AND,OR,NOT.
+Typical actions consist of tagging the message, setting a priority, a
+status, redirecting or discarding it automatically.  </para>
+
+<para>The filter's direction can be <emphasis>Incoming mail</emphasis> to test the rule only against incoming messages (imported by manitou-mdx), <emphasis>Outgoing mail</emphasis> against messages that are written and sent with Manitou-Mail, <emphasis>Both</emphasis> for both incoming and outgoing, or <emphasis>None</emphasis> to disable the filter altogether.
+</para>
+
+<para>
+The user interface has an editor for conditions and actions, launched by the <guimenuitem>File->Filters</guimenuitem> menu command. Below is a screenshot with some sample rules defined:
+<screenshot>
+<mediaobject>
+<imageobject><imagedata fileref="img/filters.png" align="center" /></imageobject>
+<caption><para>Filter rule editor</para></caption>
+</mediaobject>
+</screenshot>
+</para>
+
+<sect1 id="filters.expressions">
+<title>Expressions syntax</title>
+<sect3>
+<title>Literal constants</title>
+<para>
+Numbers must be positive integers in base 10. When a number is immediately followed by the letter K, it is multiplied by 1024 (for kilobytes). When it is immediately followed by the letter M, it is multiplied by 1024*1024 (for megabytes), and when followed by G, it is multiplied by 1024*1024*1024 (for gigabytes).
+The letter after the number can be uppercase or lowercase.
+</para>
+
+<para>
+Strings must be enclosed between double quotes or single quotes.
+If the first character is a single quote, double quotes can be used in the string as normal characters (example: <literal>'Result of "command"'</literal>). Conversely, if the first character is a double quote, single quotes can be used normally inside the string (example: <literal>"Scarlett O'Hara"</literal>)
+</para>
+<para>
+A string may also contain the enclosing character itself. In this case, the entire string must be started by a backslash before the single or double quote, and each non-terminating occurrence of the enclosing character inside the string must be preceded by a backslash. In addition, to represent a backslash itself in such a string, the backslash character must be doubled.
+For example, a regexp that matches single or double quotes could be written as:
+<literal>\"[\"\']"</literal>
+</para>
+</sect3>
+
+<sect3>
+<title>Operators</title>
+<table id="table-operators-functions">
+ <title>Operators for filter expressions</title>
+ <tgroup cols="3">
+ <thead>
+ <row>
+   <entry>Operator</entry>
+   <entry>Example</entry>
+   <entry>Description</entry>
+ </row>
+ </thead>
+ <tbody>
+   <row>
+     <entry><literal>!</literal></entry>
+     <entry><literal>!condition("urgent")</literal></entry>
+     <entry>Logical inverse of the operand. Equivalent to <literal>not</literal>.</entry>
+   </row>
+
+   <row>
+     <entry><literal>=<sbr />is</literal></entry>
+     <entry><literal>header("Precedence")="bulk"</literal></entry>
+     <entry>Test for the case insensitive equality of two strings. (<literal>"A"="a"</literal> is true).</entry>
+   </row>
+
+   <row>
+     <entry><literal>isnot</literal></entry>
+     <entry><literal>to isnot "me@example.com"</literal></entry>
+     <entry>This is the logical inverse of the <literal>is</literal> operator.</entry>
+   </row>
+
+   <row>
+     <entry><literal>eq</literal></entry>
+     <entry><literal>header("Precedence") eq "bulk"</literal></entry>
+     <entry>Test for the exact equality of two strings (case sensitive).</entry>
+   </row>
+
+   <row>
+     <entry><literal>ne</literal></entry>
+     <entry><literal>header("Precedence") ne "bulk"</literal></entry>
+     <entry>This is the logical inverse of the <literal>eq</literal> operator (case-sensitive equality of strings).</entry>
+   </row>
+
+   <row>
+     <entry><literal>contain</literal><sbr /><literal>contains</literal></entry>
+     <entry><literal>header("from") contains "@domain.net"</literal></entry>
+     <entry>True if the left operand contains the right operand, case insensitive.</entry>
+   </row>
+
+   <row>
+     <entry><literal>!=</literal></entry>
+     <entry><literal>now("month")!=12</literal></entry>
+     <entry>Test for the inequality of two numeric values.</entry>
+   </row>
+
+   <row>
+     <entry><literal>==</literal></entry>
+     <entry><literal>date("weekday")==1</literal></entry>
+     <entry>Test for the equality of two numeric values.</entry>
+   </row>
+
+   <row>
+     <entry><literal>&lt;<sbr />&lt;=<sbr />&gt;<sbr />&gt;=</literal></entry>
+     <entry><literal>age("days")&gt;=2</literal></entry>
+     <entry>Compare two numeric values, testing for lower, lower or equal, greater, greater or equal.</entry>
+   </row>
+
+   <row>
+     <entry><literal>=~</literal></entry>
+     <entry><literal>header("subject") =~ "^\[URGENT\]"</literal></entry>
+     <entry>True if the left operand matches the regular expression in the right operand, case insensitive.</entry>
+   </row>
+
+   <row>
+     <entry><literal>!~</literal></entry>
+     <entry><literal>header("subject") !~ "^\[URGENT\]"</literal></entry>
+     <entry>True if the left operand does not match the regular expression in the right operand, case insensitive.</entry>
+   </row>
+
+   <row>
+     <entry><literal>regmatches</literal></entry>
+     <entry><literal>header("subject") regmatches "^\[URGENT\]"</literal></entry>
+     <entry>True is the left operand against the regular expression matches the right operand, case sensitive.</entry>
+   </row>
+
+   <row>
+     <entry><literal>and</literal></entry>
+     <entry><literal>from is "a@domain.com" AND to is "b@domain.com"</literal></entry>
+     <entry>True if both the left operand and right operand evaluate to true.</entry>
+   </row>
+
+   <row>
+     <entry><literal>or</literal></entry>
+     <entry><literal>from is "a@domain.com" OR from is "b@domain.com"</literal></entry>
+     <entry>True if either of the left operand or right operand evaluate to true.</entry>
+   </row>
+
+ </tbody>
+</tgroup>
+</table>
+</sect3>
+
+
+<para>
+Arbitrarily complex expressions can be written by combining conditions and operators and nested parentheses. Example:
+<screen>
+(pg_gen OR pg_interf) AND NOT (header("From") contains "@mydomain.tld")
+</screen>
+
+All the expressions that have at least one action connected to them are evaluated, unless the "Stop filters" action gets triggered.
+</para>
+
+</sect1>
+
+<sect1 id="filters.functions">
+<title>Built-in functions</title>
+<para>Expressions may call built-in functions that implicitly refer to the message being filtered. Functions provide information about the messages, the context and meta-data, but they're not allowed to modify anything. On the other hand, filter actions may modify some message properties, such as the priority or certain header fields. In this case, functions that are called subsequently work on the modified data. Another way of expressing this is that the effects of filters will cascade onto the filters.</para>
+
+<table id="table-filters-functions">
+ <title>Built-in filter functions</title>
+ <tgroup cols="4">
+ <thead>
+ <row>
+   <entry>Function name</entry>
+   <entry>Return type</entry>
+   <entry>Arguments</entry>
+   <entry>Description</entry>
+ </row>
+ </thead>
+ <tbody>
+   <row>
+     <entry><literal>age</literal></entry>
+     <entry>number</entry>
+     <entry>
+       A time unit as a string, which must be one of <literal>"minutes"</literal>, <literal>"hours"</literal> or <literal>"days"</literal>.
+     </entry>
+     <entry>Return the time elapsed since the date and time indicated in the Date field of the message, as a number of minutes, hours or days depending on the argument. If the date field cannot be parsed, the result is null.</entry>
+   </row>
+
+   <row>
+     <entry><literal>body</literal></entry>
+     <entry>string</entry>
+     <entry>None</entry>
+     <entry>Return the entire body of the message.</entry>
+   </row>
+
+   <row>
+     <entry><literal>cc</literal></entry>
+     <entry>string</entry>
+     <entry>None</entry>
+     <entry>Return a comma-separated list of addresses extracted from the Cc (carbon copy) field. If the Cc field is <literal>"John Doe" &lt;john.doe@email.tld&gt;</literal>, the cc function will return <literal>john.doe@email.tld</literal> (whereas <literal>header("Cc")</literal> would return the entire field).</entry>
+   </row>
+
+   <row>
+     <entry><literal>condition</literal></entry>
+     <entry>boolean</entry>
+     <entry>Condition name</entry>
+     <entry>Evaluate the named condition and return its result. The name refers to another filter entry.</entry>
+   </row>
+
+   <row>
+     <entry><literal>date</literal></entry>
+     <entry>boolean</entry>
+     <entry>Date field</entry>
+     <entry>Return the date and time of the message in the local time zone. The possible arguments are the same than for the <literal>now()</literal> function.</entry>
+   </row>
+
+   <row>
+     <entry><literal>date_utc</literal></entry>
+     <entry>boolean</entry>
+     <entry>Date field</entry>
+     <entry>Identical to the date() function, except that the date and time is expressed in UTC time instead of the local time zone.</entry>
+   </row>
+
+   <row>
+     <entry><literal>from</literal></entry>
+     <entry>string</entry>
+     <entry>None</entry>
+     <entry>Return the sender's address extracted from the From field. In the unlikely event that there are several addresses in this field, return a comma-separated list of these addresses.</entry>
+   </row>
+
+   <row>
+     <entry><literal>header</literal></entry>
+     <entry>string</entry>
+     <entry>Field name</entry>
+     <entry>Return the decoded value of the header field, or an empty string if the field is not found. The line is unfolded and non US-ASCII characters encoded with the RFC-2047 rules have been decoded and converted to unicode. Use rawheader() to access the non-decoded version. </entry>
+   </row>
+
+   <row>
+     <entry><literal>headers</literal></entry>
+     <entry>string</entry>
+     <entry>None</entry>
+     <entry>Return the decoded value of the entire message header as one big string with consecutive fields separated by a newline character. The lines are unfolded and non US-ASCII characters encoded with the RFC-2047 rules have been decoded and converted to unicode. This function should be used only in the rare cases where it's not adequate to target a specific field with the header() function.</entry>
+   </row>
+
+   <row>
+     <entry><literal>identity</literal></entry>
+     <entry>string</entry>
+     <entry>none</entry>
+     <entry>Return the email address from our identities that is associated with the message. For an outgoing message, that would normally be the address of the From field. For an incoming message, it is the mail address that is associated with the spool directory from wich the mailfile has been picked up. These associations are declared in manitou-mdx configuration file.</entry>
+   </row>
+
+   <row>
+     <entry><literal>now</literal></entry>
+     <entry>string</entry>
+     <entry>Date field</entry>
+     <entry>Return the current date and time in the local timezone. The possible arguments and corresponding return values are:
+       <itemizedlist>
+         <listitem>"hour": the current hour with 2 digits, "00".."23"</listitem>
+         <listitem>"minute": the current minute with 2 digits, "00".."59"</listitem>
+         <listitem>"second": the current second with 2 digits, "00".."59"</listitem>
+         <listitem>"day": the day of the month with 2 digits, "01".."31"</listitem>
+         <listitem>"month": the month with 2 digits, "01".."12"</listitem>
+         <listitem>"year": the year with 4 digits</listitem>
+         <listitem>"weekday": the index of the day in the week with 1 digit "0".."6" (0 being sunday)</listitem>
+         <listitem>"date": the current date expressed as YYYY-MM-DD</listitem>
+         <listitem>"time": the current time expressed as HH:MM:SS</listitem>
+       </itemizedlist>
+       The result of now() refers to the beginning of the filter evaluation, so that it doesn't change during the evaluation itself.
+     </entry>
+   </row>
+
+   <row>
+     <entry><literal>now_utc</literal></entry>
+     <entry>string</entry>
+     <entry>Date field</entry>
+     <entry>This is identical to now(),except that it returns the date in UTC time instead of the local timezone.</entry>
+   </row>
+
+   <row>
+     <entry><literal>rawheader</literal></entry>
+     <entry>string</entry>
+     <entry>Field name</entry>
+     <entry>Return the non-decoded value of the header field, possibly with quoted-printable and base64 contents as defined in RFC-2047 , or empty if the field is not found. The line is unfolded. Generally the <literal>header</literal>function should be used instead.</entry>
+   </row>
+
+   <row>
+     <entry><literal>rawheaders</literal></entry>
+     <entry>string</entry>
+     <entry>None</entry>
+     <entry>Return the non-decoded value of the entire message header as one big string with consecutive fields separated by a newline character, possibly with quoted-printable and base64 contents according to RFC2047. Generally the <literal>headers</literal>function should be used instead.</entry>
+   </row>
+
+   <row>
+     <entry><literal>to</literal></entry>
+     <entry>string</entry>
+     <entry>None</entry>
+     <entry>Return a comma-separated list of addresses extracted from the To (recipient) field. If the To field is <literal>"John Doe" &lt;john.doe@email.tld&gt;</literal>, the to function will return <literal>john.doe@email.tld</literal> (whereas <literal>header("To")</literal> would return the entire field).</entry>
+   </row>
+
+ </tbody>
+</tgroup>
+</table>
+
+</sect1> <!-- built-in functions -->
+
+<sect1 id="filters.actions">
+<title>Filter actions</title>
+<para>The action panel refers to the currently selected condition. It is disabled when no condition is selected.
+To add an action, select (New action) in the actions list.
+To remove the currently selected action, use the Del key.
+</para>
+
+<para>The actions that are currently supported are:
+<itemizedlist>
+
+<listitem><para><emphasis role="bold">Assign tag</emphasis>: assign a tag to the matching messages. Child tags are expressed flattened as parent_tag->child_tag->grandchild_tag->...</para>
+</listitem>
+
+<listitem><para><emphasis role="bold">Set status</emphasis>: the argument is a combination of letters: 'R' for read,'A' for archive, all separated by + signs.</para>
+</listitem>
+
+<listitem><para><emphasis role="bold">Remove header</emphasis>: discard the specified header field. If the field is present multiple times, all its occurrences will be removed.</para>
+</listitem>
+
+<listitem><para><emphasis role="bold">Set header</emphasis>: set a header field. If the field is already present, the new value will replace the old one in all occurrences of the field, otherwise the field will be added.</para>
+</listitem>
+
+<listitem><para><emphasis role="bold">Set priority</emphasis>: assign a priority to the matching messages, either as an increment, with the <userinput>+=X</userinput> syntax or as an absolute value, with the <userinput>=X</userinput> syntax. The priority is an integer number ranging from -32768 to +32767.</para></listitem>
+
+<listitem><para><emphasis role="bold">Redirect</emphasis>: the argument is an email address to which the matching message is immediately resent.</para></listitem>
+
+<listitem><para><emphasis role="bold">Delete</emphasis>: discard the message or put it into the trashcan. The latter is equivalent to having the <literal>trashed</literal> status.</para></listitem>
+
+<listitem><para><emphasis role="bold">Stop filters</emphasis>: this is a control-action that instructs the filtering the system that it shouldn't evaluate any more filter rule for the current message.</para>
+</listitem>
+
+<listitem><para><emphasis role="bold">Set identity</emphasis>: assign a different identity to the
+message.
+Each incoming message is associated by manitou-mdx to an
+identity defined in Preferences/Identities, and each outgoing message
+is also associated to a sender's identity chosen in the mail
+composer. The purpose of this action is to override this identity. One
+practical use is that when replying to an incoming message with an
+updated identity, the new identity will automatically be pre-selected as
+the sender of the reply.</para></listitem>
+
+</itemizedlist>
+</para>
+</sect1>
+
+
+<sect1 id="filters.examples">
+<title>Use cases examples</title>
+<sect3>
+<title>High priority routing during non-business hours</title>
+<para>
+Consider alert e-mails sent by a Nagios monitoring system.  If they're
+received outside of business hours, we want to transfer them to some
+other mail account, for example one that is routed to a mobile phone.
+</para>
+
+<literallayout>Condition name: alert
+Expression: from is "nagios@domain.tld" AND subject contains "** PROBLEM Service Alert"
+Actions: none
+
+Condition name: business hours
+Expression: (now("hour") &gt;= 9) AND (now("hour") &lt; 18)
+Actions: none
+
+Condition name: (not necessary)
+Expression: condition("alert") AND (NOT condition("business hours"))
+Actions: redirect to mobile's email
+
+Condition name: (not necessary)
+Expression: condition("alert") AND condition("business hours")
+Actions: set priority to +10
+</literallayout>
+</sect3>
+
+<sect3>
+<title>Ignoring undesirable Reply-To fields</title>
+<para>Normally, the presence of a Reply-To field suggests that a reply should go only to the addresses designated by the field, there-by ignoring the From and Cc fields. But this feature is sometimes misused, either by mailing-lists software or by senders who set up their mail account with a Reply-To field always set.
+</para>
+<para>
+The filtering system provides an action that removes a specific header field. That can be used against these undesirable Reply-To fields.
+Example:<literallayout>Expression: from is "specific-email@domain.tld" AND header("reply-to") is "specific-email@domain.tld"
+Actions: Remove header field Reply-To
+</literallayout>
+</para>
+
+</sect3>
+
+<sect3>
+<title>Filtering on dates</title>
+<para>
+The current day is the first day of the month: <literal>now("day")="01"</literal> or <literal>now("day")==1</literal> (with implicit conversion to numeric).
+<sbr/>
+The year is 2011: <literal>now("year")="2011"</literal>.
+<sbr/>
+The day is exactly the November 17, 2011: <literal>now("date")="2011-11-17"</literal>
+<sbr/>
+The sender's date on the message is November 17, 2011: <literal>date("date")="2011-11-17"</literal>
+</para>
+</sect3>
+
+</sect1>
+
+</chapter>
+
+
+
+<chapter id="ui.preferences">
+<title>Preferences</title>
+
+<sect1 id="ui.preferences.display">
+<title>Display</title>
+<para>Various options control how the messages are shown and how the
+display is organized.</para>
+
+<itemizedlist>
+
+<listitem>Show tags panel:
+<para>The default value for the Display/Tags menu entry.
+When set to "Yes", a panel with a button for each tag is shown, each button
+being set when the corresponding tag is assigned to the message
+currently selected.</para>
+</listitem>
+
+<listitem>Show headers:
+<para>The default value for the Display/Headers menu
+entry.  "None" means not to display any message header at all, "Most"
+means the most useful (From, To, Cc, Date...), and "All" means the full headers
+text.
+</para>
+</listitem>
+
+<listitem>Display sender as: 
+<para>Tells what should displayed in the "From" column
+of message lists: either the name of the sender (when known), or the email address.
+</para>
+</listitem>
+
+<listitem>Preferred display format:
+<para>When a message has both HTML and Text alternative representations, this
+option indicates which format should be shown first in the message pane.
+Text is the most secure choice.</para>
+</listitem>
+
+<listitem>Dynamic recipient column:
+<para>When all messages of a list have the <literal>Sent</literal> status, the Sender column is automatically switched to a Recipient column when this option is set to Yes. The column is switched back automatically to Sender when the list contents change, or manually with the context menu of the columns headers.</para>
+</listitem>
+
+<listitem>Clickable URLs in body
+<para> when set to Yes, URLs in the body
+panel appear as clickable links. The browser may need to be configured
+in the Paths sections.
+</para>
+</listitem>
+
+<listitem>Threaded display: 
+<para>The default value for the Display/Threaded menu
+entry. When set to "Yes", the messages that belong to a same thread are shown
+in tree-like representation, and the threads can be opened and closed.
+</para>
+</listitem>
+
+<listitem>Date format:
+<para>How the dates are displayed in the message
+lists.  Choose DD/MM/YYYY HH:MI or YYYY/MM/DD HH:MI depending on what you
+find the more easy to read.
+</para>
+</listitem>
+
+<listitem>N in 'last N messages'
+<para>The contextual popup menu of a
+message on display has a command fetching the last messages of the
+same sender than the mail currently shown. This setting tells how
+much of these messages this command should retrieve in one go.
+</para>
+</listitem>
+
+<listitem>Style:
+<para>The Qt library has several builtin styles (the actual
+list depends on the platform the interface is running on). The style
+controls the overall look of the interface as well as some usability
+tips, such as the function of the middle mouse button. Just try different
+styles and keep the one you like the most.
+</para>
+</listitem>
+</itemizedlist>
+
+</sect1>
+
+<sect1 id="ui.preferences.identities">
+<title>Identities</title>
+
+<para>An identity is the set of characteristics that define a sender. Multiple identities can be declared, and one of them only is the default. Once an identity is defined in the preferences, it can be choosen in the mail composer.</para>
+
+<itemizedlist>
+<listitem>Email address:
+<para>Only the email should be entered here, without any additional
+comment (example: john.doe@company.com). That field is required to be able
+to send mail messages with manitou-mail.
+</para>
+</listitem>
+
+
+<listitem>Name:
+<para> The full name of the user that goes along the email
+address. (example: John Doe)
+</para>
+</listitem>
+
+
+<listitem>Use as default:
+<para> The identity to use by default when a new outgoing message is started with the composer (menu command: <guimenuitem>Message->New</guimenuitem>).
+</para>
+</listitem>
+
+<listitem>Signature:
+<para>A multi-line piece of text that will be appended to an outgoing
+message before editing takes place.</para>
+
+<para>The text can contain references to certain fields that will be dynamically replaced by their current values at compose time. The fields refer to the sender's identity and the person currently using the interface to compose the message, or in the case of a message generated by a script, a pseudo-user that has a entry in the <literal>users</literal> table whose login matches the database login used to connect. Field names need to be enclosed inside angle brackets to be recognized as such.
+
+<para>The fields available in the signature are:
+<itemizedlist>
+<listitem><literal>{operator_login}</literal>: the operator's database login of the person who composes the messages</listitem>
+<listitem><literal>{operator_firstname}</literal>: the operator's first name</listitem>
+<listitem><literal>{operator_fullname}</literal>: the operator's first name and name</listitem>
+<listitem><literal>{operator_email}</literal>: the operator's email address</listitem>
+<listitem><literal>{sender_email}</literal>: the sender's email address for the outgoing message, corresponding to the sender's identity</listitem>
+<listitem><literal>{sender_name}</literal>: the name associated to the identity of the outgoing message</listitem>
+<listitem><literal>{operator_custom_field1}</literal>: the value for the operator's custom_field1 database field.</listitem>
+<listitem><literal>{operator_custom_field2}</literal>: the value for the operator's custom_field2 database field.</listitem>
+<listitem><literal>{operator_custom_field3}</literal>: the value for the operator's custom_field3 database field.</listitem>
+
+</itemizedlist>
+</para>
+</para>
+</listitem>
+
+<listitem>X-Face:
+<para>An optional string consisting of ASCII characters
+that are supposed to represent the face of the user, encoded in a
+black and white 48x48 bitmap. Manitou-mail can decode this string and
+display it graphically along the headers; other mail programs such as
+XEmacs VM or Sylpheed do this as well. To encode a picture in X-Face
+format, you may want to check out <ulink url="http://www.dairiki.org/xface">
+http://www.dairiki.org/xface</ulink>
+</para>
+</listitem>
+
+</itemizedlist>
+</sect1>
+
+<sect1 id="ui.preferences.mimeviewers">
+<title>MIME viewers</title>
+<para>The list of programs that should be used to view attachments, each
+corresponding to a MIME type (a MIME type is a string like
+'image/jpeg', 'application/x-tar' that defines the type of data
+contained in an attached file).
+</para>
+</sect1>
+
+<sect1 id="ui.preferences.composer">
+<title>Composer</title>
+
+<itemizedlist>
+<listitem>Format for new messages:
+<para>Plain text or HTML. In the case of HTML, an alternative plain text version
+of the body is automatically created and attached to the outgoing message,
+as expected by contacts who can't or don't want to use an HTML-capable program to read their mail.
+</para>
+</listitem>
+
+<listitem>Format for replies:
+<para>Replies can be initiated in plain text, HTML, or the same format than the original message, the latter being assumed to be the best choice in general. In any case, the format can be changed manually inside the composer during the edition of the reply.
+</para>
+</listitem>
+</itemizedlist>
+</sect1>
+
+
+<sect1 id="ui.preferences.paths">
+<title>Paths</title>
+<para>The paths used by the user interface</para>
+
+<itemizedlist>
+<listitem>Attachments (temporary):
+<para>the directory where attachments
+are written just before launching the application that is associated
+with their MIME type.
+</para>
+</listitem>
+
+<listitem>Bitmaps:
+<para> the directory where manitou icons files are to be
+found. The path set at install time is used by default, but it can be
+changed later, if for example, icons should be read from a shared
+network drive.
+</para>
+</listitem>
+
+<listitem>Help files: 
+<para>the directory where help files reside.
+The default value is empty and means that they're looked up
+in a location depending on the installation and the current
+language defined by the OS environment.
+</para>
+</listitem>
+
+<listitem>Browser:
+<para>A command that will be launched when an URL
+is clicked. If it contains $1, that will be replaced by the URL to be opened,
+otherwise the URL will be appended at the end of the command.
+Examples:
+<screen>
+mozilla-xremote-client 'openurl($1,new-window)'
+kfmclient openURL
+</screen>
+Note that it can be different from the
+program used to open 'text/html' attachments.
+</para>
+</listitem>
+</itemizedlist>
+</sect1>
+
+<sect1 id="ui.preferences.fetching">
+<title>Fetching</title>
+<para>Options about database fetch.</para>
+
+<itemizedlist>
+<listitem>Max fetch ahead:
+<para> when a list of messages is displayed,
+the program can pre-fetch to memory the bodies of messages not
+yet read and that are immediately below in the list.
+That may save some time when later going through the list, especially when
+connected remotely through a slow network link.
+</para>
+</listitem>
+
+<listitem>Max database connexions:
+<para> the program may use more than
+one connexion to perform simultaneous tasks. This number is
+the maximum number of such connexions.
+</para>
+</listitem>
+
+<listitem>Automatically refresh results every X minutes:
+<para> When set to a non-zero value, this parameter gives the time interval
+to wait between two automatic refreshs of the currently selected messages list.
+When set to zero, automatic refresh is disabled.
+</para>
+<para>The database configuration key for this setting is <literal>fetch/auto_refresh_messages_list</literal></para>
+</listitem>
+
+<listitem>Auto-incorporate new messages into list:
+<para>This setting is only effective when the automatic refresh interval is not zero. When checked on, it means that the contents of the list will automatically show new messages following an automatic refresh, without the need for any user interaction.</para>
+<para>
+When checked off, new messages will not appear until the user refreshes the selection by using the <guimenuitem>Selection->Refresh</guimenuitem> command or by clicking on the "New mail" button at the bottom right of the main window.
+</para>
+<para>The contents of the quick selection panel are updated in both cases.</para>
+<para>The database configuration key for this setting is <literal>fetch/auto_incorporate_new_results</literal></para>
+</listitem>
+
+</itemizedlist>
+</sect1>
+
+
+</chapter>
+
+<chapter id="ui.mailing">
+<title>Mailing</title>
+<para>
+Mailings are used to send a similar message such as a newsletter or an announce to a large number of recipients. The message's text is a template in plain text or HTML format, that may contain variables for per-recipient data merging into the body of the messages.
+
+The mailing is prepared and controlled in the user interface, but the actual sending is done server-side in a batch. 
+</para>
+
+<sect1 id="ui.mailing.template">
+<title>Template</title>
+The template is the text of the message, plus variable names enclosed in two-brackets pairs, as in <literal>{{variable_name}}</literal>. A mailing may have one template only, in plain text or html format, or two templates, one of each format. They can be submitted:
+<itemizedlist>
+<listitem>From files on disk. Either one file is submitted, in HTML or plain text format, or two distinct files, one for each format. The contents must be encoded in the current locale.</listitem>
+<listitem>By reusing the template of a previous mailing in the database.</listitem>
+<listitem>From a template stored in the database, by the <guimenuitem>Message->Save as template</guimenuitem> command of the mail composition window.</listitem>
+</itemizedlist>
+
+<para>Brackets, ampersand and angle brackets are not allowed in variable names in templates.</para>
+
+<para>If the format chosen for the message is HTML with alternate plain text while only an HTML template is supplied, the text version will be generated by the program. In this case, it is advised to carefully check this generated text version in the mail preview (accessible at the end of the mailing setup). In particular, hyperlinks with a text and target URL come out with only the text. To avoid that, the only way currently is to supply a custom plain text template in a separate file.</para>
+
+<para>The subject for the mailing may also contain variables, enclosed between two brackets like in the template.</para>
+
+<para>The merge process will not replace variables whose names are not found in the data file.</para>
+</sect1>
+
+
+<sect1 id="ui.mailing.datafile">
+<title>Data file</title>
+
+<para>The mailmerge data is submitted in a file in CSV format, encoded in the current locale. The normal separator between fields is the comma, but tabs and semicolons are also accepted.</para>
+
+<para>If there are no variables in the template, the data file should contain only one column for the recipient address, with one line per recipient. A header line is not expected to be present.</para>
+
+<para>On the other hand, if there are variables in the template, there must be a CSV header line at the very beginning of the file, with the column names matching the names of variables for the merge process. Also, the first column is assigned by convention to the recipient address. In the examples below, the name "email" is given to this column.</para>
+<para>Here is an example of a simple data file containing two records, with the variables <literal>title</literal>, <literal>firstname</literal> and <literal>name</literal> in addition to the mandatory <literal>email</literal> field.
+
+<literallayout class="monospaced">
+email;title;firstname;name
+john.doe@mail.tld;Mr;John;Doe
+jane.doe@mail2.tld;Ms;Jane;Doe
+</literallayout>
+</para>
+
+<para>Fields may contain newlines, when they're enclosed in double quotes. Here is another valid data file, with two records and a postal address field spanning multiples lines:
+<literallayout class="monospaced">
+"email","name","postal address","country"
+"s.sosa@domain.tld","Daniela Sosa","Casilla de Correo 432
+Correo Central
+C1000WAM Capital Federal","ARGENTINA"
+"w.heisenberg@domain.tld","Mr W Heisenberg","U 235
+201-203 BROADWAY AVE
+WEST BEACH SA 5024","AUSTRALIA"   
+</literallayout>
+</para>
+
+<para>Double quotes in the data itself must be represented as two successive double quotes.</para>
+
+<para>Once the mailing is stored in the database, the data files and template files if any can be discarded, since theirs contents are stored into the database as part of the mailing data. They will be later removed from the database if and when the mailing gets deleted.</para>
+</sect1>
+
+<sect1 id="ui.mailing.control">
+<title>Control of the sending</title>
+<para>When the mailing is put in the "running" state, the manitou-mdx process is notified of the change (assuming it is running), and starts the actual
+sending in background . The user interface may then be quit without the
+mailing being stopped.
+If necessary, it can still be paused or cancelled by the user interface. Operating on a mailing is done by running the <guimenuitem>File->Mailings</guimenuitem> command which displays the list of mailings and offers some actions.</para>
+<para>When a mailing is selected, the possible actions are:
+<itemizedlist>
+<listitem><guimenuitem>Start</guimenuitem>: send a signal to manitou-mdx to spawn the sending process as soon as possible.</listitem>
+<listitem><guimenuitem>Stop</guimenuitem>: only available if the mailing is running. It stops the sending process.</listitem>
+<listitem><guimenuitem>Delete</guimenuitem>: purge a mailing (to free database space).</listitem>
+<listitem><guimenuitem>View</guimenuitem>: view the outgoing messages in a special preview window for mailings.</listitem>
+
+</itemizedlist>
+Additionally, the <guimenuitem>Refresh</guimenuitem> action causes an immediate refresh of the list (otherwise it's automatically done every 5s).
+</para>
+
+</sect1>
+
+<sect1 id="ui.mailing.limitations">
+
+<title>Limitations</title>
+
+<para>Mailings cannot have attachments.</para>
+
+<para>Individual messages from mailings are not stored in the database, so when the mailing is finished and purged, there is no way to view the outgoing messages it generated.</para>
+
+<para>There is no limit to the number of recipients, but there is a unique sender for a particular mailing, and it has to be declared as a sender identity in <guimenuitem>File->Preferences->Identities</guimenuitem>.</para>
+
+<para>Aside from the subject line, there is currently no way to provide additional header lines.</para>
+
+</sect1>
+
+</chapter>
+
+<chapter id="ui.mail-import">
+<title>Mailbox import</title>
+<para>Several mailboxes formats exist. Manitou-Mail supports the mboxo and mboxrd formats. The mailbox file is submitted by the user interface, as an alternative to doing it with the --import-mbox option of manitou-mdx, the server-side program.
+
+The mailbox import happens in three distinct steps:
+<itemizedlist>
+<listitem>Basic verification of the contents and the format of the file.</listitem>
+<listitem>Upload of the file itself to the database server, with a progress bar. Ther user interface must be kept running during this step.</listitem>
+<listitem>Import of each message, done server-side by manitou-mdx.</listitem>
+</itemizedlist>
+</para>
+
+<para>
+The user interface may be closed during the third step. The progress of the operation can still be followed anytime in the "Mail Import" window.
+</para>
+
+<para>Several simultaneous imports can be launched within the user interface. manitou-mdx will enqueue them automatically and process them on a first-in first-out basis.
+
+When the status of an import is finished, it may be purged from the history of imports with the "Purge" button.
+
+An import may also be stopped before completion. The messages that have been successfully imported before the stop will be not deleted or modified in any way. Only the messages not yet imported will be left.
+Stopping does not purge the data that was not yet imported, and a stopped import can still be restarted. To get rid of an import and reclaim the size it occupies in the database, the "Purge" command has to be used.
+</para>
+
+</chapter>
+
+<chapter id="server">
+<title>Server's configuration</title>
+<sect2 id="server.config">
+<title>Server's configuration</title>
+<para>Certain features depend on the configuration and database contents of the server-side component: manitou-mdx.
+manitou-mdx is documented separately.
+</para>
+</sect2>
+</chapter>
+
+<!--
+<chapter id="ui.message-format">
+<title>Message Format</title>
+
+<para>
+
+The initial format depends on the preferences.  If the message is new,
+its format comes from the format choice in the Composer tab of the
+preferences.  If the message is a reply and the preferences are set to
+use the same format as the sender, then that format is used, unless the user
+currently viewing the message has choosen a plain text view, in which case a plain text format is used instead.
+
+It is possible for the user to change the format while composing a
+message, but going from html to plain text will cause all formatting
+attributes like fonts or colors to be lost. Also, no HTML part will be
+in the final message when it's edited as plain text, even if it was
+started as HTML. Conversely, following the composition of an HTML
+message, a plain text part will be automatically be created, as
+expected by people on the receiving end who may use text-only mail programs.
+
+Currently, since the automatically-generated plain text part is only
+created when the message is finished, its contents cannot be modified
+or even viewed in the user interface before the message gets stored in
+the database.
+
+</para> </chapter>
+-->
+

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://docbook.org/xml/4.2/docbookx.dtd" [
+<!ENTITY manitou-ui SYSTEM "manitou-ui.docbook">
+]>
+
+<book id="manitou" lang="en">
+<bookinfo>
+<title>Manitou-Mail 1.3.1 Documentation</title>
+<subtitle>Part 1/2: the User Interface</subtitle>
+
+<edition>Documentation for Manitou-Mail 1.3.1</edition>
+<copyright><year>2010-2013</year><holder>Daniel Vérité</holder></copyright>
+<editor><ulink url="http://www.manitou-mail.org/">www.manitou-mail.org</ulink>
+</editor>
+
+</bookinfo>
+
+
+<chapter id="introduction">
+<title>What is Manitou-Mail?</title>
+<para>Manitou-Mail is a multi-component <emphasis role="bold">E-Mail application</emphasis> that includes:
+<itemizedlist>
+<listitem>a graphical Mail User-Agent for MS-Windows, Apple OS X and Linux/Unix</listitem>
+<listitem>a server-side program, manitou-mdx.</listitem>
+<listitem>a database powered by PostgreSQL.</listitem>
+</itemizedlist>
+Its architecture differs from traditional mailers in that the user interface is solely connected to the database, rather than IMAP/POP3 and SMTP servers.
+A server-side daemon program, manitou-mdx, is responsible for routing messages between the database and the mail subsystem, as well as filtering, indexing and custom-processing the stream of messages in background.
+</para>
+
+<para>
+This is the documentation for the <emphasis role="bold">User Interface</emphasis>.
+</para>
+
+</chapter>
+
+
+&manitou-ui;
+
+
+<!-- <index /> -->
+ </book>

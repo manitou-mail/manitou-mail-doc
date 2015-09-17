@@ -1047,6 +1047,12 @@ display is organized.</para>
 
 <itemizedlist>
 
+<listitem>Messages order:
+<para> Either "Newest first" or "Oldest first". Determines the default order of messages
+in any selected list
+</para>
+</listitem>
+
 <listitem>Show tags panel:
 <para>The default value for the Display/Tags menu entry.
 When set to "Yes", a panel with a button for each tag is shown, each button
@@ -1104,6 +1110,18 @@ find the more easy to read.
 message on display has a command fetching the last messages of the
 same sender than the mail currently shown. This setting tells how
 much of these messages this command should retrieve in one go.
+</para>
+</listitem>
+
+<listitem>New mail notifications:
+<para>set to "None" or "System". When a new mail is imported by the
+server, if set on "System", a notification to the desktop system is
+issued. This feature works currently on Unix/MacOS X desktops that
+have a notification interface. On MS-Windows it has no effect.
+<!--
+A future version of the interface will have integrated mail notifications, which will
+differ from "System" in that it will behave the same across desktops
+-->
 </para>
 </listitem>
 
@@ -1206,9 +1224,44 @@ as expected by contacts who can't or don't want to use an HTML-capable program t
 <para>Replies can be initiated in plain text, HTML, or the same format than the original message, the latter being assumed to be the best choice in general. In any case, the format can be changed manually inside the composer during the edition of the reply.
 </para>
 </listitem>
+
+<listitem>Basic syntax check on addresses:
+<para>If set to "Yes", refuse addresses that are seemingly incorrect as
+input. Even though they are technically correct, certain syntaxes for
+email addresses are not actually used nowadays, and are more likely to be
+input errors than intentional.
+Examples: a bare word without any @-sign and domain name, or
+a group (ending by a colon and semi-colon).
+
+When this setting is set to "No", the responsibility of rejecting a
+wrong email address is left to the rest of the email system. Generally a
+message sent to a wrong addresses will result in a non-delivery notification by the
+mailer daemon.
+
+</para>
+</listitem>
 </itemizedlist>
 </sect1>
 
+<sect1 id="ui.preferences.search">
+<title>Search</title>
+<para>The configuration of the full-text search</para>
+
+<itemizedlist>
+<listitem>
+Accents &amp; diacritics marks:
+<para> Accents can be ignored in search in order to find words whose
+accents or diacritic marks may lack or differ across messages. This
+setting indicates how the search operates by default with accents.
+Finding accented words by a non-accented word only works on the
+contents for which the server-side indexer was configured accordingly
+(See <literal>index_words_accent_mode</literal> setting on the
+server).
+</para>
+
+</listitem>
+</itemizedlist>
+</sect1>
 
 <sect1 id="ui.preferences.paths">
 <title>Paths</title>

@@ -192,6 +192,7 @@ Options:
 
 <sect1 id="manitou-mgr.inverted-index">
 <title>Inverted full-text index management commands</title>
+<sect2><title>Reindexing</title>
 <para>
 <cmdsynopsis>
   <command>manitou-mgr</command>
@@ -228,7 +229,9 @@ Options:
 
  <varlistentry>
   <term>--reindex-partitions</term>
-  <listitem>When not specified, all partitions are indexed. If specified as a number (starting at 0), only this partition is reindexed. When specified as a range in <literal>N-M</literal> form, all partitions between N and M inclusive are reindexed.</listitem>
+  <listitem>When not specified, all partitions are indexed. If specified as a number (starting at 0), only this partition is reindexed. When specified as a range in <literal>N-M</literal> form, all partitions between <literal>N</literal> and <literal>M</literal> inclusive are reindexed. A partition designates a range of <literal>mail_id</literal> (internal unique message identifier), rather than a physical table. The size of these ranges is given by the configuration setting <literal>word_index_partsize</literal> in the <literal>runtime_info</literal> table.
+<indexterm><primary>word_index_partsize</primary></indexterm>
+</listitem>
 </varlistentry>
 
  <varlistentry>
@@ -242,7 +245,44 @@ Options:
 </varlistentry>
 
 </variablelist>
+</sect2>
 
+<sect2>
+<title>Partitioning the words table</title>
+<para>
+<cmdsynopsis>
+  <command>manitou-mgr</command>
+  <group choice="req">
+    <arg choice="req">--do-partition-words</arg>
+    <arg choice="req">--undo-partition-words</arg>
+  </group>
+<sbr/>
+  <arg>--dry-run</arg>
+  <arg>--conf=<replaceable>/path/to/configfile</replaceable></arg>
+</cmdsynopsis>
+</para>
+
+Options:
+<variablelist>
+
+ <varlistentry>
+  <term>--do-partition-words</term>
+  <listitem>Transform the words table into 28 smaller tables prefixed by <literal>word</literal>. Also create a view named <literal>words</literal> to read all of them through a sql union.
+ The partitioning be used when the <literal>words</literal> table is so large than insert time becomes problematic. The event is also registered into the <literal>runtime_info</literal> table and taken into account by import. If a manitou-mdx process is connected to the database with <literal>index_words</literal> enabled, it should be terminated before launching this command.</listitem>
+</varlistentry>
+
+<varlistentry>
+  <term>--undo-partition-words</term>
+  <listitem>After the <literal>words</literal> table has been partitioned, this command undoes the setup by recreating a large unique <literal>words</literal> table. It also registered the event so that subsequent import and searches will use it as non-partitioned.
+If a <literal>manitou-mdx</literal> process is connected to the database with <literal>index_words</literal> enabled, it should be terminated before launching this command.</listitem>
+</varlistentry>
+
+<varlistentry>
+  <term>--dry-run</term>
+  <listitem>Display the SQL that would be executed instead of actually executing them.</listitem>
+</varlistentry>
+</variablelist>
+</sect2>
 </sect1>
 
 

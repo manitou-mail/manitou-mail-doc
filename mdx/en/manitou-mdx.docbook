@@ -372,9 +372,15 @@ local_delivery_agent=/usr/lib/sendmail -f $FROM$ -t
 <para>The path of the directory where incoming mailfiles are looked for.
 It is the fact that a mailfile is found in the associated spool directory
 that tells the mdx that the message is to be associated with this identity.
-Other possible sources of incoming mail are <xref linkend="spool_mailbox" endterm="spool_mailbox.title"/>
-for mbox files and <xref linkend="spool_maildir" endterm="spool_maildir.title"/> for a maildir
-directory structure.
+
+<!--
+Other possible sources of incoming mail are
+<xref linkend="spool_mailbox" endterm="spool_mailbox.title"/> for mbox
+files and <xref linkend="spool_maildir"
+endterm="spool_maildir.title"/> for a maildir directory structure.
+-->
+Another possible source of incoming mail is <xref linkend="spool_maildir"
+endterm="spool_maildir.title"/> for a maildir directory structure.
 </para>
 <para>
 Example:
@@ -549,6 +555,7 @@ security_checks=yes
 </para>
 </sect3>
 
+<!--
 <sect3 id="spool_mailbox"><title id="spool_mailbox.title">spool_mailbox</title>
 <indexterm><primary>spool_mailbox</primary></indexterm>
 <para>In: identities sections</para>
@@ -570,23 +577,26 @@ spool_mailbox=/var/spool/mail/manitou
 </programlisting>
 </para>
 </sect3>
+-->
 
 <sect3 id="spool_maildir"><title id="spool_maildir.title">spool_maildir</title>
 <indexterm><primary>spool_maildir</primary></indexterm>
 <para>In: identities sections</para>
-<para>The full path of the maildir structure where incoming mail is checked for
-and imported into the manitou-mail database for this identity.
-When a new message arrives in the mailbox, or when the mailbox contains initial messages on manitou-mdx start, they get moved to a different location with movemail and then imported into the manitou-mail database.
-Other possible sources of incoming mail are <xref linkend="mailfiles_directory" />
-for a directory containing *.received files and
-<xref linkend="spool_mailbox" endterm="spool_maildir.title"/> for a mailbox file.
+<para>The absolute path of one or several maildir structure from which incoming mail is imported.
+Multiple paths are separated by colons.
+Inside the maildir, files immediately under the subdirectories <literal>new/</literal> and <literal>cur/</literal> are imported and deleted upon success.  
+Folders are not recursed into. Each folder to import from must be explicitly listed with its absolute path.
 </para>
 <para>
 Example:
 <programlisting>
-[support@example.com]
-spool_maildir=/home/manitou/Maildir
+[manitou@example.com]
+spool_maildir=/var/lib/manitou/Maildir:/var/lib/manitou/Maildir/.mailing-lists
 </programlisting>
+</para>
+<para>
+Another possible source of incoming mail is <xref linkend="mailfiles_directory" />
+for a directory containing <literal>*.received</literal> files.
 </para>
 </sect3>
 

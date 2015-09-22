@@ -7,10 +7,10 @@
 
 <book id="manitou" lang="en">
 <bookinfo>
-<title>Manitou-Mail 1.3.1 Documentation</title>
+<title>Manitou-Mail 1.4.0 Documentation</title>
 <subtitle>Part 2/2: server-side utilities and database</subtitle>
-<edition>Documentation for Manitou-Mail 1.3.1</edition>
-<copyright><year>2010-2013</year><holder>Daniel Vérité</holder></copyright>
+<edition>Documentation for Manitou-Mail 1.4.0</edition>
+<copyright><year>2010-2015</year><holder>Daniel Vérité</holder></copyright>
 <editor><ulink url="http://www.manitou-mail.org/">www.manitou-mail.org</ulink>
 </editor>
 
@@ -190,7 +190,7 @@ Schema upgrade successful
 Before launching manitou-mdx, it is advised to review and edit this
 file.
 At least, the <xref linkend="mdx.db_connect_string" endterm="db_connect_string.title"/> entry that contain the parameters for the connection to the database should be
-set, as well as mail origins (spool directory, or mailbox, or maildir) for new incoming messages to be automatically imported into the database.
+set, as well as mail origins (spool directory, or maildir) for new incoming messages to be automatically imported into the database.
 </para>
 
 <para>A minimum configuration file could be:
@@ -199,7 +199,7 @@ set, as well as mail origins (spool directory, or mailbox, or maildir) for new i
 db_connect_string = Dbi:Pg:dbname=mail;user=manitou
 
 [name@example.com]
-mailfiles_directory=/var/manitou/spool
+spool_maildir=/var/lib/manitou/Maildir
 </programlisting>
 </para>
 

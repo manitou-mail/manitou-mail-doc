@@ -1413,7 +1413,7 @@ WEST BEACH SA 5024","AUSTRALIA"
 </sect1>
 
 <sect1 id="ui.mailing.control">
-<title>Control of the sending</title>
+<title>Sending control</title>
 <para>When the mailing is put in the "running" state, the manitou-mdx process is notified of the change (assuming it is running), and starts the actual
 sending in background . The user interface may then be quit without the
 mailing being stopped.

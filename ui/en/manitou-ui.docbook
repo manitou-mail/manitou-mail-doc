@@ -18,15 +18,15 @@ the program will display this dialog window:
 </screenshot>
 
 Fields left empty in this window get default values provided by
-the PostgreSQL client-API:
+the PostgreSQL client library:
 <itemizedlist>
 <listitem><para>Database name: login name of the current user (as logged to the operating system).</para></listitem>
 <listitem><para>Login: also the login name of the current user.</para></listitem>
 <listitem><para>Password: empty.</para></listitem>
-<listitem><para>Host: empty, which means connect locally to an unix domain socket on Unix, or localhost on MS-Windows.</para></listitem>
+<listitem><para>Host: empty, which means connect locally to an Unix domain socket on Unix or MacOS, or <literal>localhost</literal> on MS-Windows.</para></listitem>
 <listitem><para>More parameters: empty.</para></listitem>
 </itemizedlist>
-These defaults can themselves be overriden with some PostgreSQL specific
+These defaults can themselves be overriden with some PostgreSQL-specific
 environment variables, such as PGHOST, PGUSER or PGPORT.
 </para>
 
@@ -49,10 +49,16 @@ The accepted options are:
   </para></listitem>
 
 
-<listitem><para>--config: a configuration's name. This option is necessary only to use different configurations on the same database from the same desktop machine. See the <link linkend="ui.configurations">user interface configurations</link>
-for more.</para></listitem>
+<listitem><para>--config: a configuration's name. This option is
+necessary only to use different configurations on the same database
+from the same desktop machine. See
+the <link linkend="ui.configurations">user interface
+configurations</link> for more.</para></listitem>
 
-<listitem><para>--debug-output: an integer debug level between 1 and 10. Useful only for developers.</para></listitem>
+<listitem><para>--debug-output: an integer debug level between 1 and
+10, that produces more or less verbose output on the terminal about
+what the application is doing. This is useful only for developers or
+troubleshooting.</para></listitem>
 
 </itemizedlist>
 </para>
@@ -75,17 +81,30 @@ for more.</para></listitem>
 <para>
 The main window is divided into four panels, as numbered in the screenshot above.
 <itemizedlist>
-<listitem>1: the quick selection panel contains a tree view that provides one-click access to dynamic lists of messages.</listitem>
-<listitem>2: the current list of messages, or results list, typically obtained by clicking on an item in the quick selection panel or by the <guimenuitem>Selection->New query</guimenuitem> command.</listitem>
-<listitem>3: the contents of the message that is currently selected, if any.</listitem>
-<listitem>4: the tags panel, to add or remove tags from the currently selected messages. If not needed, it can be hidden by unchecking <guimenuitem>Display->Tags panel</guimenuitem> in the menu bar.</listitem>
+
+<listitem>1: the quick selection panel contains a tree view that
+provides one-click access to dynamic lists of messages.</listitem>
+
+<listitem>2: the current list of messages, or results list, typically
+obtained by clicking on an item in the Quick selection panel or by
+the <guimenuitem>Selection->New query</guimenuitem>
+command.</listitem>
+
+<listitem>3: the contents of the message that is currently selected,
+if any.</listitem>
+
+<listitem>4: the tags panel, to add or remove tags from the currently
+selected messages. If not needed, it can be hidden by
+unchecking <guimenuitem>Tags panel</guimenuitem> in
+th <guimenuitem>Display</guimenuitem>menu.</listitem>
 </itemizedlist>
+
 </para>
 
 </sect1>
 
 <sect1 id="ui.quicksel">
-<title>The quick selection panel</title>
+<title>The Quick selection panel</title>
 <para>
 This panel is laid out as a tree structure. Each leaf
 is internally associated to a query; when the user selects a tree item,
@@ -187,31 +206,54 @@ The positions and sizes of the columns are saved in the database in the current 
 <sect3>
 <title>Pages</title>
 <para>
-The interface displays lists of messages in pages between which the user can navigate with Move back and Move forward commands (bound to alt-left and alt-right keys), like in a web browser. When a new set of results is requested, a new page is opened, replacing the list of messages previously on screen. Other pages can be instantly displayed back on screen by moving through pages, back and forward.
+The interface displays lists of messages in pages between which the
+user can navigate with Move back and Move forward commands (bound to
+alt-left and alt-right keys), like in a web browser. When a new set of
+results is requested, a new page is opened, replacing the list of
+messages previously on screen. Other pages can be instantly displayed
+back on screen by moving through pages, back and forward.
 </para>
 
 <para>
 These commands are meant to let the user navigate rapidly through lists of messages.
-Example: a message currently on screen is from john.doe@domain.tld.
-The user right clicks on the subject line and choose the Last 10 messages from john.doe@domain.tld command.
+Example: a message currently on screen is
+from <literal>john.doe@example.org</literal>. The user right clicks
+on the subject line and choose the <literal>Last 10 messages from
+john.doe@example.org</literal> command.
 The program then opens a new page with the results.
-The user wades through the results, and when done, comes back to the previous page by issuing <guimenuitem>Move back</guimenuitem>.
-The display and selection will then be restored as they were before the Last 10 messages... command was issued.
+The user wades through the results, and when done, comes back to the
+previous page by issuing <guimenuitem>Move back</guimenuitem>.
+The display and selection will then be restored as they were before
+the Last 10 messages... command was issued.
 </para>
 
 <para>
-The number of pages that are kept in memory is a configuration parameter named "msg_window_pages" which defaults to 5. It means that when a new page is opened while there are already five result pages in memory, the older page (number 1) is removed from the memory to get room for the new one. The page number 2 becomes number 1, 3 becomes 2, and so on.
+The number of pages that are kept in memory is a configuration
+parameter named <literal>msg_window_pages</literal> which defaults to
+5. It means that when a new page is opened while there are already
+five result pages in memory, the older page (number 1) is removed from
+the memory to get room for the new one. The page number 2 becomes
+number 1, 3 becomes 2, and so on.
 </para>
 
 <para>
-When a new page is opened while there are other pages after it, the new page becomes the tail of the pages list, which means that the pages that were after can no longer be accessed with the <guimenuitem>Move forward</guimenuitem> command. This matches web browsers behavior.
+When a new page is opened while there are other pages after it, the
+new page becomes the tail of the pages list, which means that the
+pages that were after can no longer be accessed with
+the <guimenuitem>Move forward</guimenuitem> command. This matches web
+browsers behavior.
 </para>
 </sect3>
 
 <sect3>
 <title>Windows</title>
 <para>
-A new window with an entirely new set of pages (initially blank) can be opened with the <guimenuitem>File->New window</guimenuitem> command. Different windows are manipulated completely independently from each other, except that when several windows show the same message, a status change or a deletion of that message is visually propagated to all windows.
+A new window with an entirely new set of pages (initially blank) can
+be opened with the <guimenuitem>File->New window</guimenuitem>
+command. Different windows are handled completely independently from
+each other, except that when several windows show the same message, a
+status change or a deletion of that message is visually propagated to
+all windows.
 </para>
 </sect3>
 </sect1>
@@ -412,17 +454,21 @@ called. </para>
 </para>
 </sect3>
 
-<sect3><title>Dates between</title>
-<para>The date format expected is YYYY/MM/DD (US style) or
-DD/MM/YYYY (european style) depending on the current preferences.
-One of the minimum (lower bound) or maximum (upper bound) can be omitted
-to select an semi-open interval of dates.
-</para>
-</sect3>
+<sect3><title>Date</title>
+<para>This field offers a list of pre-selected choices like
+<literal>Today</literal>, <literal>Yesterday</literal>, <literal>Last
+7 days</literal> and a few other that implicitly refer to the current date.
 
-<sect3><title>Not older than</title>
-<para>Use this field to retrieve only the more recent messages,
-with "recent" expressed as a number of days, or weeks, or months back from now.
+<literal>Range</literal> is a special case: it enables date pickers
+for entering specific start and end dates. Each of them is paired with
+a checkbox.  When <literal>Start</literal> is checked, messages older
+than the start date will be filtered out.  Conversely,
+when <literal>End</literal> is checked, messages newer than the date
+next to it will be filtered out. When both are checked, the message
+dates must be in the range between <literal>Start</literal>
+and <literal>End</literal>. When both are unchecked, it is equivalent
+to choosing <literal>Any</literal> in the pre-selected choices: this
+date filter is disabled.
 </para>
 </sect3>
 
@@ -557,7 +603,11 @@ Attachments are shown in a panel at the bottom of the message's body. Attachment
 <sect1 id="attachments.save">
 <title>Saving attachments</title>
 <para>
-Select the files to be saved (multi-selection is possible) in the attachments list and use the <guimenuitem>Message->Attachment->Save</guimenuitem> command.
+Select the files to be saved (multi-selection is possible) in the
+attachments list and use
+the <guimenuitem>Message->Attachment->Save</guimenuitem> command,
+or <guimenuitem>Save to disk</guimenuitem> in the contextual menu.
+
 If several attachments are selected, a directory selector will appear. If only one attachment is selected, a filename and path selector will appear, so that it's possible to change the name of the file being saved.
 For each attachment with no predefined filename, the application will prompt for a filename before saving.
 </para>
@@ -572,7 +622,7 @@ MIME types can be associated with an external program to be viewed. This is done
 File extensions may be associated to programs through the operating system.
 When an attached file has an extension registered in the system, the contextual menu on that attachment has an <guimenuitem>Open with: name of program</guimenuitem> entry.
 Also when double-clicking on the attachment, an <guimenuitem>Open or Save</guimenuitem> choice is proposed in a intermediate dialog box.
-Currently this association between file extensions and programs is only checked on the Windows platform.
+Currently, this association between file extensions and programs is only checked on the Windows platform.
 </para>
 </sect1>
 
@@ -671,7 +721,7 @@ If the first character is a single quote, double quotes can be used in the strin
 <para>
 A string may also contain the enclosing character itself. In this case, the entire string must be started by a backslash before the single or double quote, and each non-terminating occurrence of the enclosing character inside the string must be preceded by a backslash. In addition, to represent a backslash itself in such a string, the backslash character must be doubled.
 For example, a regexp that matches single or double quotes could be written as:
-<literal>\"[\"\']"</literal>
+<literal><![CDATA[ "[\"\']" ]]></literal>
 </para>
 </sect3>
 
@@ -720,7 +770,7 @@ For example, a regexp that matches single or double quotes could be written as:
 
    <row>
      <entry><literal>contain</literal><sbr /><literal>contains</literal></entry>
-     <entry><literal>header("from") contains "@domain.net"</literal></entry>
+     <entry><literal>header("from") contains "@example.net"</literal></entry>
      <entry>True if the left operand contains the right operand, case insensitive.</entry>
    </row>
 
@@ -762,13 +812,13 @@ For example, a regexp that matches single or double quotes could be written as:
 
    <row>
      <entry><literal>and</literal></entry>
-     <entry><literal>from is "a@domain.com" AND to is "b@domain.com"</literal></entry>
+     <entry><literal>from is "a@example.com" AND to is "b@example.com"</literal></entry>
      <entry>True if both the left operand and right operand evaluate to true.</entry>
    </row>
 
    <row>
      <entry><literal>or</literal></entry>
-     <entry><literal>from is "a@domain.com" OR from is "b@domain.com"</literal></entry>
+     <entry><literal>from is "a@example.com" OR from is "b@example.com"</literal></entry>
      <entry>True if either of the left operand or right operand evaluate to true.</entry>
    </row>
 
@@ -781,7 +831,7 @@ For example, a regexp that matches single or double quotes could be written as:
 <para>
 Arbitrarily complex expressions can be written by combining conditions and operators and nested parentheses. Example:
 <screen>
-(pg_gen OR pg_interf) AND NOT (header("From") contains "@mydomain.tld")
+(pg_gen OR pg_interf) AND NOT (header("From") contains "@example.org")
 </screen>
 
 All the expressions that have at least one action connected to them are evaluated, unless the "Stop filters" action gets triggered.
@@ -825,7 +875,7 @@ All the expressions that have at least one action connected to them are evaluate
      <entry><literal>cc</literal></entry>
      <entry>string</entry>
      <entry>None</entry>
-     <entry>Return a comma-separated list of addresses extracted from the Cc (carbon copy) field. If the Cc field is <literal>"John Doe" &lt;john.doe@email.tld&gt;</literal>, the cc function will return <literal>john.doe@email.tld</literal> (whereas <literal>header("Cc")</literal> would return the entire field).</entry>
+     <entry>Return a comma-separated list of addresses extracted from the Cc (carbon copy) field. If the Cc field is <literal>"John Doe" &lt;john.doe@example.org&gt;</literal>, the cc function will return <literal>john.doe@example.org</literal> (whereas <literal>header("Cc")</literal> would return the entire field).</entry>
    </row>
 
    <row>
@@ -922,7 +972,7 @@ All the expressions that have at least one action connected to them are evaluate
      <entry><literal>to</literal></entry>
      <entry>string</entry>
      <entry>None</entry>
-     <entry>Return a comma-separated list of addresses extracted from the To (recipient) field. If the To field is <literal>"John Doe" &lt;john.doe@email.tld&gt;</literal>, the to function will return <literal>john.doe@email.tld</literal> (whereas <literal>header("To")</literal> would return the entire field).</entry>
+     <entry>Return a comma-separated list of addresses extracted from the To (recipient) field. If the To field is <literal>"John Doe" &lt;john.doe@example.org&gt;</literal>, the to function will return <literal>john.doe@example.org</literal> (whereas <literal>header("To")</literal> would return the entire field).</entry>
    </row>
 
  </tbody>
@@ -988,7 +1038,7 @@ other mail account, for example one that is routed to a mobile phone.
 </para>
 
 <literallayout>Condition name: alert
-Expression: from is "nagios@domain.tld" AND subject contains "** PROBLEM Service Alert"
+Expression: from is "nagios@example.org" AND subject contains "** PROBLEM Service Alert"
 Actions: none
 
 Condition name: business hours
@@ -1011,7 +1061,7 @@ Actions: set priority to +10
 </para>
 <para>
 The filtering system provides an action that removes a specific header field. That can be used against these undesirable Reply-To fields.
-Example:<literallayout>Expression: from is "specific-email@domain.tld" AND header("reply-to") is "specific-email@domain.tld"
+Example:<literallayout>Expression: from is "specific-email@example.org" AND header("reply-to") is "specific-email@example.org"
 Actions: Remove header field Reply-To
 </literallayout>
 </para>
@@ -1390,18 +1440,18 @@ The template is the text of the message, plus variable names enclosed in two-bra
 
 <literallayout class="monospaced">
 email;title;firstname;name
-john.doe@mail.tld;Mr;John;Doe
-jane.doe@mail2.tld;Ms;Jane;Doe
+john.doe@example.org;Mr;John;Doe
+jane.doe@example.com;Ms;Jane;Doe
 </literallayout>
 </para>
 
 <para>Fields may contain newlines, when they're enclosed in double quotes. Here is another valid data file, with two records and a postal address field spanning multiples lines:
 <literallayout class="monospaced">
 "email","name","postal address","country"
-"s.sosa@domain.tld","Daniela Sosa","Casilla de Correo 432
+"s.sosa@example.org","Daniela Sosa","Casilla de Correo 432
 Correo Central
 C1000WAM Capital Federal","ARGENTINA"
-"w.heisenberg@domain.tld","Mr W Heisenberg","U 235
+"w.heisenberg@example.com","Mr W Heisenberg","U 235
 201-203 BROADWAY AVE
 WEST BEACH SA 5024","AUSTRALIA"   
 </literallayout>
@@ -1449,12 +1499,19 @@ Additionally, the <guimenuitem>Refresh</guimenuitem> action causes an immediate 
 
 <chapter id="ui.mail-import">
 <title>Mailbox import</title>
-<para>Several mailboxes formats exist. Manitou-Mail supports the mboxo and mboxrd formats. The mailbox file is submitted by the user interface, as an alternative to doing it with the --import-mbox option of manitou-mdx, the server-side program.
+<para>Several mailboxes formats exist. Manitou-Mail supports
+the <literal>mboxo</literal> and <literal>mboxrd</literal>
+formats. The mailbox file is submitted by the user interface, as an
+alternative to doing it with the <literal>--import-mbox</literal>
+option of manitou-mdx, the server-side program.
 
 The mailbox import happens in three distinct steps:
 <itemizedlist>
-<listitem>Basic verification of the contents and the format of the file.</listitem>
-<listitem>Upload of the file itself to the database server, with a progress bar. Ther user interface must be kept running during this step.</listitem>
+<listitem>Basic verification of the contents and the format of the
+file.</listitem>
+<listitem>Upload of the file itself to the database server, with a
+progress bar. Ther user interface must be kept running during this
+step.</listitem>
 <listitem>Import of each message, done server-side by manitou-mdx.</listitem>
 </itemizedlist>
 </para>

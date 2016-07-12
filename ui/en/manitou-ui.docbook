@@ -616,13 +616,18 @@ For each attachment with no predefined filename, the application will prompt for
 <sect1 id="attachments.view">
 <title>Viewing attachments with a helper program</title>
 <para>
-MIME types can be associated with an external program to be viewed. This is done in the database with the <literal>programs</literal> table.
+MIME types can be associated with an external program to be viewed. This is done in the database through the <literal>programs</literal> table.
 </para>
 <para>
 File extensions may be associated to programs through the operating system.
 When an attached file has an extension registered in the system, the contextual menu on that attachment has an <guimenuitem>Open with: name of program</guimenuitem> entry.
 Also when double-clicking on the attachment, an <guimenuitem>Open or Save</guimenuitem> choice is proposed in a intermediate dialog box.
 Currently, this association between file extensions and programs is only checked on the Windows platform.
+</para>
+<para>
+Attachments of type <literal>message/rfc822</literal> are displayed by
+default in a window inside the interface, but if a program is assigned
+to them, it will be run instead.
 </para>
 </sect1>
 

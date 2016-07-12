@@ -693,15 +693,64 @@ tmpdir=/var/tmp/manitou
 </sect1>
 
 <sect1 id="mdx.importing-mbox">
-<title>Importing an existing mailbox in mbox format</title>
+<title>Importing existing mail archives</title>
+Mailboxes in mbox format can be imported directly with
+the <literal>--mboxfile</literal> option. Otherwise, collections of
+mail files inside directories (maildir or MH formats) can be imported
+with <literal>--import-list</literal>.
+
+<sect2>
+<title>Import mailboxes in mbox format</title>
 <programlisting>
 $ manitou-mdx --conf=/path/to/config_file --mboxfile=/path/to/mboxfile \
-  [--tag=optional_tagname] [--status=1] [--mailbox=name@example.com]
+  [--tag=tagname] [--status=1] [--mailbox=name@example.com]
 </programlisting>
 
-<para>If the <literal>--tag</literal> option is used and the tag doesn't exist, it will be created. For a sub-tag (that is not at the top level of the tags hierarchy), the syntax to use is <literal>parent->subtag</literal>.
-The --status=1 option has the effect of marking the imported mail as already read, otherwise it will be considered as new.
-Optionally, the --mailbox argument can be used to specify to what mailbox the messages should be assigned. The mailbox will be created in the database, if it doesn't exist.</para>
+<para>
+The <literal>--tag</literal> option will create the tag if it doesn't
+exist already, and assign it to every imported message from that mailbox.
+For a sub-tag (that is not at the top level of the tags hierarchy), the syntax to use
+is <literal>parent->subtag</literal>.
+The <literal>--status=1</literal> option has the effect of marking the imported mail as
+already read, otherwise it will be considered as new. A status of <literal>33 (32+1)</literal>,
+meaning read and archived, may also be used.
+
+Optionally, the <literal>--mailbox</literal> argument can be used to specify to what
+mailbox the messages should be assigned. An entry for this mailbox will be created
+in the database, if it doesn't preexists.</para>
+
+</sect2>
+
+<sect2>
+<title>Importing MH or maildir-like archives</title>
+
+Archives whose format use one file per message are processed by first
+creating a file with the list of mail files to import (one file per
+line), and then importing from that list. The exact command to create
+the list of files may vary between systems and depend on the directory
+layout of the archive.  For instance, files from a dovecot maildir
+archive might be collected with:
+<informalexample>
+<programlisting>
+$ find INBOX -type f \! -name 'dovecot*' >  /tmp/list
+</programlisting>
+</informalexample>
+
+<para>Inside the list, the file names may be designated by a relative path.
+The <literal>import-basedir</literal> option can be used to specify
+the directory into which the files reside. This base directory can be
+a full path or relative to the current directory. If it's not
+specified, then the file names in the list are also interpreted
+relatively to the current directory.
+
+<programlisting>
+$ manitou-mdx --conf=/path/to/config_file --import-list=/path/to/list \
+  [--import-basedir=/path/to/directory] \
+  [--tag=optional_tagname] [--status=1] [--mailbox=name@example.com]
+</programlisting>
+</para>
+
+</sect2>
 
 </sect1>
 

@@ -328,6 +328,74 @@ See also the substring search capabilities of the Query command
 (<guimenuitem>Selection->New Query</guimenuitem>).
 </para>
 
+<para>
+Search operators are supported to filter on the status, date, senders or recipients of messages.
+Multiple conditions are implicitly joined with a logical AND.
+
+The search expressions are described below.
+<table id="table-operators-searchbar">
+ <title>Search expressions</title>
+ <tgroup cols="3">
+ <thead>
+ <row>
+   <entry>Operator</entry>
+   <entry>Example</entry>
+   <entry>Description</entry>
+ </row>
+</thead>
+ <tbody>
+   <row>
+     <entry><literal>date</literal></entry>
+     <entry><literal>date:2015-07</literal></entry>
+     <entry>The possible formats are <literal>YYYY-MM-DD</literal> to select
+     messages from exactly that day, or <literal>YYYY-MM</literal> for messages
+     from that month, or <literal>YYYY</literal> to filter on a year.
+     The special values <literal>today</literal> and <literal>yesterday</literal>
+     are also interpreted.</entry>
+   </row>
+
+   <row>
+     <entry><literal>date_before</literal></entry>
+     <entry><literal>date_before:2016</literal></entry>
+     <entry>Accepts the same format as <literal>date</literal>, and selects the messages
+     older or of the same date than the argument.</entry>
+   </row>
+
+   <row>
+     <entry><literal>date_after</literal></entry>
+     <entry><literal>date_after:2016-05</literal></entry>
+     <entry>Accepts the same format as <literal>date</literal>, and selects the messages
+     newer or of the same date than the argument.</entry>
+   </row>
+
+   <row>
+     <entry><literal>is</literal> (status)</entry>
+     <entry><literal>is:read</literal></entry>
+     <entry>The messages to find must have the indicated
+     status. The recognized values for statuses are
+       <literal>read</literal>,
+       <literal>replied</literal>,
+       <literal>forwarded</literal>,
+       <literal>archived</literal>,
+       <literal>sent</literal>.
+     Statuses are cumulative, so this search criterion can be present several times with
+       different arguments.
+     </entry>
+   </row>
+
+   <row>
+     <entry><literal>isnot</literal> (status)</entry>
+     <entry><literal>isnot:archived</literal></entry>
+     <entry>It stands for the exact opposite of <literal>is</literal> and accepts the same arguments.</entry>
+   </row>
+
+ </tbody>
+</tgroup>
+</table>
+
+
+</para>
+
 <para>Accents can be ignored in search in order to find words whose accents or
 diacritic marks may lack or differ across messages.
 This behavior can be controlled with the "Accents &amp; diacritics marks"

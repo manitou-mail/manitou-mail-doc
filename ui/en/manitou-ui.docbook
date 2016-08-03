@@ -332,7 +332,6 @@ See also the substring search capabilities of the Query command
 Search operators are supported to filter on the status, date, senders or recipients of messages.
 Multiple conditions are implicitly joined with a logical AND.
 
-The search expressions are described below.
 <table id="table-operators-searchbar">
  <title>Search expressions</title>
  <tgroup cols="3">
@@ -344,6 +343,24 @@ The search expressions are described below.
  </row>
 </thead>
  <tbody>
+   <row>
+     <entry><literal>from</literal></entry>
+     <entry><literal>from:name@example.com</literal></entry>
+     <entry>Find messages with a specific email address in their <literal>From</literal> header.</entry>
+   </row>
+
+   <row>
+     <entry><literal>to</literal></entry>
+     <entry><literal>to:name@example.com</literal></entry>
+     <entry>Find messages with a specific email address in their <literal>To</literal> header.</entry>
+   </row>
+
+   <row>
+     <entry><literal>cc</literal></entry>
+     <entry><literal>cc:name@example.com</literal></entry>
+     <entry>Find messages with a specific email address in their <literal>Cc</literal> header.</entry>
+   </row>
+
    <row>
      <entry><literal>date</literal></entry>
      <entry><literal>date:2015-07</literal></entry>
@@ -371,8 +388,8 @@ The search expressions are described below.
    <row>
      <entry><literal>is</literal> (status)</entry>
      <entry><literal>is:read</literal></entry>
-     <entry>The messages to find must have the indicated
-     status. The recognized values for statuses are
+     <entry>Find messages with the indicated status.
+        The recognized values for statuses are
        <literal>read</literal>,
        <literal>replied</literal>,
        <literal>forwarded</literal>,
@@ -387,6 +404,12 @@ The search expressions are described below.
      <entry><literal>isnot</literal> (status)</entry>
      <entry><literal>isnot:archived</literal></entry>
      <entry>It stands for the exact opposite of <literal>is</literal> and accepts the same arguments.</entry>
+   </row>
+
+   <row>
+     <entry><literal>tag</literal></entry>
+     <entry><literal><para>tag:"name of tag"</para><para>tag:parent->child</para></literal></entry>
+     <entry>Find messages to which a specific tag is assigned. Double quotes may be used to enclose a tag name containing separators. Any double quote in the name itself should be escaped by a preceding backslash. The hierarchy separator for tags is the sequence of two characters <literal>-&gt;</literal> (minus sign followed by right angle bracket). If that sequence happens to exist as an integral part of a name inside the hierarchy (not recommended), it should be backslash-escaped in the tag. For instance, <literal>tag:"ab-\&gt;cd"</literal> refers to a tag named <literal>ab-&gt;cd</literal>, with only one level of hierarchy.</entry>
    </row>
 
  </tbody>

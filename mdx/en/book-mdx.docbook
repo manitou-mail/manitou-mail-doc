@@ -7,9 +7,9 @@
 
 <book id="manitou" lang="en">
 <bookinfo>
-<title>Manitou-Mail 1.5.0 Documentation</title>
+<title>Manitou-Mail 1.6.0 Documentation</title>
 <subtitle>Part 2/2: server-side utilities and database</subtitle>
-<edition>Documentation for Manitou-Mail 1.5.0</edition>
+<edition>Documentation for Manitou-Mail 1.6.0</edition>
 <copyright><year>2010-2016</year><holder>Daniel Vérité</holder></copyright>
 <editor><ulink url="http://www.manitou-mail.org/">www.manitou-mail.org</ulink>
 </editor>

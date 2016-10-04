@@ -849,7 +849,7 @@ Plugins are declared in the configuration file, through these directives:
 
       # in a [mailbox] section (the plugin will be called only for mails to that mailbox)
       incoming_preprocess_plugins = plugin1(arg1,arg2,...) \
-      plugin2(arg1,arg2,arg3...) \
+      plugin2({arg1name=>value1, arg2name=>value2 , arg3name=>value3...}) \
       plugin3 \
       ...
 
@@ -880,7 +880,7 @@ maintenance_plugins = 5h vacuum \
 
 [mailbox@example.com]
 #  plugins for that mailbox
-incoming_preprocess_plugins = spamc("tag for spam")
+incoming_preprocess_plugins = spamc({tag=&gt;"tag-for-spam", trashed=&gt;1})
 incoming_postprocess_plugins = guesslang("en","fr") \
                                anotherplugin(arg1,arg2,...)
 outgoing_plugins = gpgsign
@@ -918,10 +918,6 @@ attachments on to <ulink url="http://wvware.sourceforge.net/">wvWare</ulink>,
 convert them to Unicode text and add their words to the full-text
 index of the body.  This allows the user interface's search engine to
 retrieve those messages based on the contents of their attachments.</para>
-</listitem>
-<listitem><para>
-
-<emphasis role="bold">html_indexer</emphasis>: a mime-process plugin that pass the HTML contents from a message to the full-text indexer, allowing the search engine to retrieve these contents. The code requires the HTML::TreeBuilder and HTML::FormatText packages from the CPAN Perl Archive.</para>
 </listitem>
 
 <listitem><para>
@@ -971,6 +967,11 @@ taken outside.
 </para>
 </listitem>
 
+<listitem><para>
+<emphasis role="bold">no_duplicate</emphasis>: an incoming_preprocess and postprocess plugin that computes the SHA1 fingerprint of a message and avoids importing it when it already exists in the database. Optionally, the postprocess stage assign new tags to the existing message if they differ from
+those in database. This is mostly useful when synchronizing from an IMAP server, using tags to represent folders, and messages are moved across folders.
+</para>
+</listitem>
 
 </itemizedlist>
 
@@ -984,9 +985,9 @@ configuration file, optionally with arguments, like this:
 # learn new spam every 2 hours
 maintenance_plugins = 2h spam_learner
 
-[mailbox@company.com]
+[mailbox@example.com]
 # these plugins will be called only for that mailbox
-incoming_preprocess_plugins = spamc("tag for spam")
+incoming_preprocess_plugins = spamc({tag=&gt;"tag-for-spam", trashed=&gt;1})
 outgoing_plugins = gpgsign
 incoming_postprocess_plugins = guesslang("en","fr") \
                                anotherplugin(arg1,arg2,...)
@@ -1054,7 +1055,7 @@ sub process {
 <para>When manitou-mdx is launched, it searches the configuration file for all plugins and includes each corresponding perl module file once, using perl's require command. It means that in the example configuration shown, it would load these files from /usr/local/manitou/plugins:
 guesslang.pm, anotherplugin.pm, spamc.pm, gpgsign.pm (note that spamc will be instantiated twice).
 
-For each reference to a plugin, a new plugin perl class is instantiated, and its init() function called with the arguments from the config file along with a database handle. For the example configuration, the following instantiations would occur:
+For each reference to a plugin, a new plugin perl class is instantiated, and its init() function called with the arguments from the config file along with a database handle (not in a transaction and in AutoCommit mode). For the example configuration, the following instantiations would occur:
 
 </para>
 <programlisting>

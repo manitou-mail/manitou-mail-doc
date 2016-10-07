@@ -40,7 +40,7 @@ new addresses and comments, like in an address book.</para>
             <varlistentry>
               <term><structfield>email_addr</structfield></term>
               <listitem><para>
-                <type>character varying(300)</type>
+                <type>text</type>
 
 <para>The email address, in lowercase characters. It is unique. </para>
 
@@ -52,7 +52,7 @@ new addresses and comments, like in an address book.</para>
             <varlistentry>
               <term><structfield>name</structfield></term>
               <listitem><para>
-                <type>character varying(300)</type>
+                <type>text</type>
 
 <para>The name (or rfc822 comment) that is optionally associated to the email. </para>
               </para>
@@ -65,7 +65,7 @@ new addresses and comments, like in an address book.</para>
               <listitem><para>
                 <type>character varying(300)</type>
 
-<para>An optional nickname for the contact. Can be used as an alias for the email address.</para>
+<para>An optional short alias for the email address.</para>
 
               </para>
 
@@ -101,7 +101,7 @@ new addresses and comments, like in an address book.</para>
               <listitem><para>
                 <type>text</type>
 
-<para>Optional comments about the contact. </para>
+<para>Optional comments on the contact. </para>
 
               </para>
 
@@ -121,21 +121,18 @@ new addresses and comments, like in an address book.</para>
             </listitem>
           </varlistentry>
 
-            <varlistentry>
-              <term><structfield>recv_pri</structfield></term>
-              <listitem><para>
-                <type>integer</type>
+         <varlistentry>
+        <term><structfield>recv_pri</structfield></term>
+        <listitem><para>
+        <type>integer</type>
+	<para>The priority of the contact. When a message comes from
+	this email address (according to the From field), this value
+	is added to priority of the message. It can be negative.
+	</para>
+          </para>
 
-
-
-<para>The priority of the contact. When a message comes from this email address (according to the From field), this value is added to priority of the message. </para>
-
-
-
-              </para>
-
-            </listitem>
-          </varlistentry>
+        </listitem>
+        </varlistentry>
 
             <varlistentry>
               <term><structfield>nb_sent_to</structfield></term>
@@ -924,17 +921,45 @@ The decoded contents of the entire header of the message. Lines are separated by
             </listitem>
           </varlistentry>
 
-            <varlistentry>
-              <term><structfield>signature</structfield></term>
-              <listitem><para>
-                <type>text</type>
+        <varlistentry>
+        <term><structfield>signature</structfield></term>
+        <listitem>
+	<para>
+        <type>text</type>
+	<para>An optional piece of text that will be appended at
+	composition time to the body of outgoing messages.
+	</para>
+        </para>
+        </listitem>
+        </varlistentry>
 
-    <para>An optional piece of text that will be appended at composition time to the body of outgoing messages. </para>
 
-              </para>
+        <varlistentry>
+        <term><structfield>root_tag</structfield></term>
+        <listitem>
+	<para>
+        <type>int</type>
+	<para>An optional reference to a tag that would be at the root of a tags
+	  hierarchy corresponding to this identity. When used in conjunction with
+	  row-level security, a user restricted to certain identities will also
+	  see only the tags below the root tags of these identities.
+	</para>
+        </para>
+        </listitem>
+        </varlistentry>
 
-            </listitem>
-          </varlistentry>
+        <varlistentry>
+        <term><structfield>restricted</structfield></term>
+        <listitem>
+	<para>
+        <type>bool</type>
+	<para>When true, indicates that access to the messages associated to this
+	  identity can be restricted through the users management rights.
+	  These restrictions are effective when row-level security is activated.
+	</para>
+        </para>
+        </listitem>
+        </varlistentry>
 
         </variablelist>
 

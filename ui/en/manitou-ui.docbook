@@ -408,7 +408,7 @@ Multiple conditions are implicitly joined with a logical AND.
 
    <row>
      <entry><literal>tag</literal></entry>
-     <entry><literal><para>tag:"name of tag"</para><para>tag:parent->child</para></literal></entry>
+     <entry><literal><para>tag:simplename</para><para>tag:"name of tag"</para><para>tag:parent->child</para></literal></entry>
      <entry>Find messages to which a specific tag is assigned. Double quotes may be used to enclose a tag name containing separators. Any double quote in the name itself should be escaped by a preceding backslash. The hierarchy separator for tags is the sequence of two characters <literal>-&gt;</literal> (minus sign followed by right angle bracket). If that sequence happens to exist as an integral part of a name inside the hierarchy (not recommended), it should be backslash-escaped in the tag. For instance, <literal>tag:"ab-\&gt;cd"</literal> refers to a tag named <literal>ab-&gt;cd</literal>, with only one level of hierarchy.</entry>
    </row>
 

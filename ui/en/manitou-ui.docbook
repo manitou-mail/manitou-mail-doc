@@ -66,6 +66,110 @@ troubleshooting.</para></listitem>
 </sect2>
 </chapter>
 
+<chapter id="ui.user-accounts">
+<title>User accounts</title>
+
+<para>The simplest way to log in to the interface is with the
+PostgreSQL account that owns the database. Setting up other users or
+access rights is not mandatory. But since that account has all
+permissions to all objects inside the database, it is meant to be used
+only by administrators or fully trusted persons.</para>
+
+<para>To manage users and restrict the actions that they can perform
+based on user profiles, Manitou-Mail provides a permissions
+system accessible through <guimenuitem>File->Manage Users</guimenuitem>.
+Basically, an administrator can create groups,
+tie permissions to groups, create users, and associate users to
+groups. The permissions are enforced by the database itself, as
+they're built on top of the PostgreSQL permissions systems.
+</para>
+
+<para>
+Additionally, databases with the row-level security feature
+(PostgreSQL 9.5 or newer) can be instructed through the interface that
+messages tied to certain identities can be accessed only by members of
+certain groups. These restrictions are based on the identity field of
+the messages, this identity representing the mail account for
+databases unifying multiple mail accounts.
+</para>
+
+<sect1>
+<title>Single-user usage</title>
+<para>
+In the case where a Manitou-Mail database is accessed by a single person, such
+as for strictly personal mailboxes, it
+is not necessary to use the <guimenuitem>File->Manage Users</guimenuitem>
+command at all.
+The owner of the database can be used as the login to connect to the interface.
+It is choosen at the creation of the database with
+<literal>manitou-mdx</literal> and is called <literal>manitou</literal> by default,
+just like the database itself. A database owner has all the rights on the database.
+</para>
+</sect1>
+
+<sect1>
+<title>The users and groups model</title>
+<para>
+Permissions on the mail database are given to groups, as opposed to directly to individual users.
+Individual user accounts are granted permissions through their group membership.
+Both users and groups entered in Manitou-Mail are mapped to PostgreSQL roles.
+Database roles representing users are members or other database roles
+representing groups.
+</para>
+
+<para>
+The actions controlled by the permission system are:
+<itemizedlist>
+  <listitem>Read messages: the minimum permission.</listitem>
+  <listitem>Modify messages: changing the status of messages.</listitem>
+  <listitem>Trash messages: moving messages to the trashcan.</listitem>
+  <listitem>Delete messages: physically deleting messages.</listitem>
+  <listitem>Write new messages: use <guimenuitem>Message->New</guimenuitem> to compose.</listitem>
+  <listitem>Define tags and filters.</listitem>
+</itemizedlist>
+
+</para>
+</sect1>
+
+<sect1>
+<title>Creating a group</title>
+<para>Group creation is accessible through the "Groups" tab in the "Database users"
+window being dispalyed by the <guimenuitem>File->Manage users</guimenuitem> command.
+</para>
+
+<screenshot>
+<mediaobject>
+<imageobject><imagedata align="center" fileref="img/edit-group.png" /></imageobject>
+<caption>Edit a group</caption>
+</mediaobject>
+</screenshot>
+
+<para>When certain mail identities must be restricted to certain users, this relationship
+between identities and users is declared through the "Access to restricted identities"
+list of that group. Identities are not necessarily restrictable, and they are not by default.
+
+</para>
+</sect1>
+
+
+<sect1>
+<title>Creating a user</title>
+<para>User creation is accessible through the "Users" tab in the "Database users"
+window displayed by the <guimenuitem>File->Manage users</guimenuitem> command.</para>
+
+<screenshot>
+<mediaobject>
+<imageobject><imagedata align="center" fileref="img/edit-user.png" /></imageobject>
+<caption>Edit a database user</caption>
+</mediaobject>
+</screenshot>
+
+</sect1>
+
+</chapter> <!-- ui.user-accounts -->
+
+
+
 <chapter id="ui.display">
 <title>Main display</title>
 <sect1 id="display-panels">
@@ -291,12 +395,11 @@ identity  can be selected when composing a message, independantly of the current
 </chapter>
 
 
-<chapter id="ui.wordsearch">
-<title>Full text search</title>
+<chapter id="ui.searchbar">
+<title>The search bar</title>
 <para>
 By default, the bodies of messages and certain attachments are indexed
-to enable fast word searches through the entire
-database.
+to enable fast word searches through the entire database.
 This global search is invoked from the search toolbar:
 <screenshot>
 <mediaobject>
@@ -1298,7 +1401,7 @@ styles and keep the one you like the most.
 <sect1 id="ui.preferences.identities">
 <title>Identities</title>
 
-<para>An identity is the set of characteristics that define a sender. Multiple identities can be declared, and one of them only is the default. Once an identity is defined in the preferences, it can be choosen in the mail composer.</para>
+<para>An identity is the set of characteristics that define a sender. Multiple identities can be declared, one of them being the default. Once an identity is defined in the preferences, it can be choosen in the mail composer in the <guimenuitem>Identity</guimenuitem> menu. The default identity is pre-selected.</para>
 
 <itemizedlist>
 <listitem>Email address:
@@ -1312,6 +1415,22 @@ to send mail messages with manitou-mail.
 <listitem>Name:
 <para> The full name of the user that goes along the email
 address. (example: John Doe)
+</para>
+</listitem>
+
+<listitem>Restrictable:
+<para> Whether mail messages associated to this identity may be hidden to certain users, depending on the group permissions that apply to them (see <xref linkend="ui.user-accounts" />).
+</para>
+</listitem>
+
+<listitem>Root tag:
+<para> The optional root of a tag hierarchy that this identity is associated to.
+The import process can use this for per-identity tagging, especially when tags
+are used to represent folders of an external  IMAP system.
+Also, when the access to an identity is restricted, the hierarchy of tags associated
+to this identity is not accessible (hidden) to operators that fall under the restriction.
+In practice, this can be used to have multiple users on the same database not seeing
+each other's messages and tags, when used in conjunction with group permissions.
 </para>
 </listitem>
 

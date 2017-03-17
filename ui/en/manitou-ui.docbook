@@ -66,7 +66,7 @@ troubleshooting.</para></listitem>
 </sect2>
 </chapter>
 
-<chapter id="ui.user-accounts">
+<chapter id="user-accounts">
 <title>User accounts</title>
 
 <para>The simplest way to log in to the interface is with the
@@ -93,7 +93,7 @@ the messages, this identity representing the mail account for
 databases unifying multiple mail accounts.
 </para>
 
-<sect1>
+<sect1 id="users.single-user">
 <title>Single-user usage</title>
 <para>
 In the case where a Manitou-Mail database is accessed by a single person, such
@@ -107,7 +107,7 @@ just like the database itself. A database owner has all the rights on the databa
 </para>
 </sect1>
 
-<sect1>
+<sect1 id="users.model">
 <title>The users and groups model</title>
 <para>
 Permissions on the mail database are given to groups, as opposed to directly to individual users.
@@ -131,7 +131,7 @@ The actions controlled by the permission system are:
 </para>
 </sect1>
 
-<sect1>
+<sect1 id="users.create-group">
 <title>Creating a group</title>
 <para>Group creation is accessible through the "Groups" tab in the "Database users"
 window being dispalyed by the <guimenuitem>File->Manage users</guimenuitem> command.
@@ -152,10 +152,11 @@ list of that group. Identities are not necessarily restrictable, and they are no
 </sect1>
 
 
-<sect1>
+<sect1 id="users.create-user">
 <title>Creating a user</title>
-<para>User creation is accessible through the "Users" tab in the "Database users"
-window displayed by the <guimenuitem>File->Manage users</guimenuitem> command.</para>
+<para>User creation and edition is accessible through the "Users" tab
+in the "Database users" window displayed by
+the <guimenuitem>File->Manage users</guimenuitem> command.</para>
 
 <screenshot>
 <mediaobject>
@@ -166,7 +167,7 @@ window displayed by the <guimenuitem>File->Manage users</guimenuitem> command.</
 
 </sect1>
 
-</chapter> <!-- ui.user-accounts -->
+</chapter> <!-- user-accounts -->
 
 
 
@@ -1419,7 +1420,7 @@ address. (example: John Doe)
 </listitem>
 
 <listitem>Restrictable:
-<para> Whether mail messages associated to this identity may be hidden to certain users, depending on the group permissions that apply to them (see <xref linkend="ui.user-accounts" />).
+<para> Whether mail messages associated to this identity may be hidden to certain users, depending on the group permissions that apply to them (see <xref linkend="user-accounts" />).
 </para>
 </listitem>
 

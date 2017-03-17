@@ -63,7 +63,7 @@ new addresses and comments, like in an address book.</para>
             <varlistentry>
               <term><structfield>nickname</structfield></term>
               <listitem><para>
-                <type>character varying(300)</type>
+                <type>text</type>
 
 <para>An optional short alias for the email address.</para>
 
@@ -471,7 +471,7 @@ Contains (key, values) string pairs that contain configuration information. Keys
             <varlistentry>
               <term><structfield>value</structfield></term>
               <listitem><para>
-                <type>character varying(2000)</type>
+                <type>text</type>
 
 <para>The value of the parameter. </para>
 
@@ -2460,7 +2460,7 @@ Example: text/html, image/jpeg, ... </para>
             <varlistentry>
               <term><structfield>rt_value</structfield></term>
               <listitem><para>
-                <type>character varying(1000)</type>
+                <type>text</type>
 
 <para>The value of the runtime variable. </para>
 
@@ -2693,7 +2693,7 @@ Example: text/html, image/jpeg, ... </para>
             <varlistentry>
               <term><structfield>title</structfield></term>
               <listitem><para>
-                <type>character varying(100)</type>
+                <type>text</type>
 
                 <literal>NOT NULL</literal>
 		<para>User-defined title of the query</para>

@@ -2,8 +2,10 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 version="1.0">
 
-  <xsl:import href="/usr/share/xml/docbook/stylesheet/nwalsh/xhtml/chunk.xsl" />
+  <xsl:import href="/usr/share/xml/docbook/stylesheet/nwalsh/html/chunk.xsl" />
 
+<xsl:param name="chunker.output.omit-xml-declaration" select="'yes'"/>
+<xsl:param name="chunker.output.encoding" select="'UTF-8'"/>
 <xsl:param name="chunk.first.sections" select="1" />
 <xsl:param name="chapter.autolabel" select="'I'" />
 <xsl:param name="section.autolabel" select="1" />

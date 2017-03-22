@@ -7,10 +7,10 @@
                xreflabel="addresses">
         <title id="table.addresses-title">
          Table:
-         
+
          <structname>addresses</structname>
         </title>
- 
+
 
 <para>Contains an entry for each email address referenced by messages
 in the database. The email addresses are extracted from the header
@@ -190,10 +190,10 @@ new addresses and comments, like in an address book.</para>
                xreflabel="attachment_contents">
         <title id="table.attachment-contents-title">
          Table:
-         
+
          <structname>attachment_contents</structname>
         </title>
- 
+
 <para>
 Contains an entry for each attachment with its decoded content. To be used in conjunction with the <xref linkend="table.attachments"/> table. Identical attachment contents (same fingerprint) are shared between different attachments.</para>
 
@@ -251,10 +251,10 @@ Contains an entry for each attachment with its decoded content. To be used in co
                xreflabel="attachments">
         <title id="table.attachments-title">
          Table:
-         
+
          <structname>attachments</structname>
         </title>
- 
+
 <para>Contains one entry for each attachment. The actual attachments contents are stored in a dedicated table: attachment_contents.</para>
 
         <para>
@@ -377,10 +377,10 @@ The use and syntax of content-ID is described in <ulink url="http://www.rfc-edit
                xreflabel="body">
         <title id="table.body-title">
          Table:
-         
+
          <structname>body</structname>
         </title>
- 
+
 <para>
 Contains the body of each message. The contents are decoded. A message may have no entry in this table if it doesn't have any text/plain nor text/html part that could be interpreted as its body at import time.
 </para>
@@ -439,12 +439,12 @@ Contains the body of each message. The contents are decoded. A message may have 
                xreflabel="config">
         <title id="table.config-title">
          Table:
-         
+
          <structname>config</structname>
         </title>
- 
+
 <para>
-Contains (key, values) string pairs that contain configuration information. Keys can be repeated with different values for different configurations names. 
+Contains (key, values) string pairs that contain configuration information. Keys can be repeated with different values for different configurations names.
 </para>
         <para>
           <variablelist>
@@ -512,7 +512,7 @@ Contains (key, values) string pairs that contain configuration information. Keys
                xreflabel="files">
         <title id="table.files-title">
          Table:
-         
+
          <structname>files</structname>
         </title>
  <para>Maps the mail database entries to the files they were created from. Useful only for debugging or administration purposes: the files may be deleted depending on the administrator's policy.</para>
@@ -558,10 +558,10 @@ Contains (key, values) string pairs that contain configuration information. Keys
                xreflabel="filter_action">
         <title id="table.filter-action-title">
          Table:
-         
+
          <structname>filter_action</structname>
         </title>
- 
+
 <para>The actions associated to conditions of the filtering system. When the condition of a filter is evaluated to true, the associated actions are applied in sequence to the message currently filtered.</para>
 
         <para>
@@ -650,10 +650,10 @@ The type of the action. Possible values are:
                xreflabel="filter_expr">
         <title id="table.filter-expr-title">
          Table:
-         
+
          <structname>filter_expr</structname>
         </title>
- 
+
 <para>Contains the conditions names and expressions of the filtering system. </para>
 
         <para>
@@ -754,10 +754,10 @@ The type of the action. Possible values are:
                xreflabel="filter_log">
         <title id="table.filter-log-title">
          Table:
-         
+
          <structname>filter_log</structname>
         </title>
- 
+
 <para>Log filter hits. An entry is inserted in this table each time manitou-mdx applies a set of actions given by the  <xref linkend="table.filter-expr"/> and  <xref linkend="table.filter-action"/> tables. A message may have several entries if several filters have been applied to it but the (mail_id,expr_id) combination should be unique.</para>
 <para>The filter logs can be displayed in the user interface.</para>
 
@@ -812,11 +812,55 @@ The type of the action. Possible values are:
       </para>
     </section>
 
+
+      <section id="table.global_notepad"
+               xreflabel="global_notepad">
+        <title id="table.global_notepad-title">
+         Table: <structname>global_notepad</structname>
+        </title>
+<para>The global notepad is a simple piece of text that is shared between
+all users of the interface.</para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>global_notepad</structname>
+            </title>
+
+            <varlistentry>
+              <term><structfield>contents</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>Informal text contents.</para>
+              </para></listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><structfield>last_modified</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+<para>The last modified time of the contents.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+
+        </variablelist>
+
+      </para>
+    </section> <!-- table:global_notepad -->
+
+
+
+
+
+
       <section id="table.header"
                xreflabel="header">
         <title id="table.header-title">
          Table:
-         
+
          <structname>header</structname>
         </title>
 <para>Each mail message has a header that consists of a list of
@@ -873,10 +917,10 @@ The decoded contents of the entire header of the message. Lines are separated by
                xreflabel="identities">
         <title id="table.identities-title">
          Table:
-         
+
          <structname>identities</structname>
         </title>
- 
+
 
 
         <para>
@@ -966,13 +1010,61 @@ The decoded contents of the entire header of the message. Lines are separated by
       </para>
     </section>
 
+      <section id="table.identities_permissions"
+               xreflabel="identities_permissions">
+        <title id="table.identities_permissions-title">
+         Table:
+         <structname>identities_permissions</structname>
+        </title>
+        <para>
+
+<para>This table maps the relationship between identities and the user accounts that are allowed to access the messages associated to these identities through the <literal>mail.identity_id</literal> column. It does not indicate what access rights apply, the permissions being managed separately by group permissions and membership. Only identities that have the restricted attribute are concerned by this mapping. The restrictions also require the <literal>Row Level Security</literal> feature on the database server (PostgreSQL 9.5 or newer).
+</para>
+          <variablelist>
+            <title>
+              Structure of <structname>identities_permissions</structname>
+            </title>
+
+            <varlistentry>
+              <term><structfield>role_oid</structfield></term>
+              <listitem><para>
+                <type>oid</type>
+
+<para>Reference to the PostgreSQL role, through the cluster-wide  <literal>pg_roles</literal> table.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>identity_id</structfield></term>
+              <listitem><para>
+                <type>int</type>
+
+<para>Identity of messages that are accessible by that role.</para>
+                <literal>REFERENCES</literal> <xref linkend="table.identities"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+      </para>
+    </section>
+
+
+
+
       <section id="table.inverted-word-index"
                xreflabel="inverted_word_index">
         <title id="table.inverted-word-index-title">
-         Table:         
+         Table:
          <structname>inverted_word_index</structname>
         </title>
- 
+
         <para>
           <variablelist>
             <title>
@@ -1178,10 +1270,10 @@ The decoded contents of the entire header of the message. Lines are separated by
                xreflabel="jobs_queue">
         <title id="table.jobs-queue-title">
          Table:
-         
+
          <structname>jobs_queue</structname>
         </title>
- 
+
 <para>This table is used internally by manitou-mdx to maintain a persistent state of jobs that are scheduled for execution. Currently these jobs are related to full text indexing, mailbox imports, and outgoing mailings.</para>
 
         <para>
@@ -1247,7 +1339,7 @@ The decoded contents of the entire header of the message. Lines are separated by
                xreflabel="mail">
         <title id="table.mail-title">
          Table:
-         
+
          <structname>mail</structname>
         </title>
         <para>
@@ -1407,7 +1499,7 @@ then replied to, and thus marked as archived should have its status set to
                 <type>integer</type>
 
 
-<para>Internal unique ID of the person (foreign key into the users  table) that most recently processed the message (replied,forwarded,trashed,archived, or composed for an outgoing message) 
+<para>Internal unique ID of the person (foreign key into the users  table) that most recently processed the message (replied,forwarded,trashed,archived, or composed for an outgoing message)
 
  </para>
               </para>
@@ -1420,7 +1512,7 @@ then replied to, and thus marked as archived should have its status set to
               <listitem><para>
                 <type>integer</type>
 
-<para>Internal unique ID of the discussion thread if a thread is referenced and recognized in the message (by looking at the Reply-To or References header fields). Null if the message couldn't be assigned to a thread. 
+<para>Internal unique ID of the discussion thread if a thread is referenced and recognized in the message (by looking at the Reply-To or References header fields). Null if the message couldn't be assigned to a thread.
  </para>
 
               </para>
@@ -1434,7 +1526,7 @@ then replied to, and thus marked as archived should have its status set to
                 <type>text</type>
 
 
-<para>The value of the Message-ID header field, truncated if necessary. 
+<para>The value of the Message-ID header field, truncated if necessary.
  </para>
 
               </para>
@@ -1582,10 +1674,10 @@ then replied to, and thus marked as archived should have its status set to
                xreflabel="mail_addresses">
         <title id="table.mail-addresses-title">
          Table:
-         
+
          <structname>mail_addresses</structname>
         </title>
- 
+
 <para>Contains a broken down database representation of the From, To, Cc ReplyTo, and Bcc addresses for each message. </para>
 
         <para>
@@ -1625,7 +1717,7 @@ then replied to, and thus marked as archived should have its status set to
               <listitem><para>
                 <type>smallint</type>
 
-<para>A constant integer that identifies the header where the email address is referenced. The possible values are: 
+<para>A constant integer that identifies the header where the email address is referenced. The possible values are:
 <itemizedlist>
 <listitem><para>From: 1</para></listitem>
 <listitem><para>To: 2</para></listitem>
@@ -1656,11 +1748,230 @@ then replied to, and thus marked as archived should have its status set to
     </section>
 
 
+
+      <section id="table.mail-status"
+               xreflabel="mail_status">
+        <title id="table.mail-status-title">
+         Table: <structname>mail_status</structname>
+        </title>
+<para> A table automatically managed by triggers, that contains references to mail messages which are not yet archived (incoming), or not yet sent (outgoing). This table is supposed to be always relatively small and cached by the database server, so this allows to speed up queries that deal with the small subset of messages that is actually current. That is especially true for databases containing very large sets of messages. </para>
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>mail_status</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>Unique internal identifier of the message.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>status</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+The same as <literal>mail.status</literal>, except that only the values that have their bits 8 (Sent) and 5 (Archived) cleared will be found here.
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+      </para>
+<para>Note: This table exists only for performance reasons and it's use is not encouraged except in the core of Manitou's application code. If possible, use the status field of the mail table instead.</para>
+
+<para>If parts or all of the contents of mail_status get accidentally deleted, they can be regenerated using the following SQL query:
+
+<literal>
+INSERT INTO mail_status(mail_id,status)
+ SELECT mail_id,status FROM mail
+  WHERE status&amp;32=0 AND status&amp;256=0
+    AND mail_id NOT IN (SELECT mail_id FROM mail_status)
+</literal>
+</para>
+    </section>
+
+      <section id="table.mail-tags"
+               xreflabel="mail_tags">
+        <title id="table.mail-tags-title">
+         Table:
+
+         <structname>mail_tags</structname>
+        </title>
+
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>mail_tags</structname>
+            </title>
+
+<para>Contains the mapping between the mail messages and the tags assigned to them. </para>
+            <varlistentry>
+              <term><structfield>mail_id</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>Unique internal identifier of the message.</para>
+                <literal>REFERENCES</literal> <xref linkend="table.mail"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>tag</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>Unique internal identifier of a tag.</para>
+                <literal>REFERENCES</literal> <xref linkend="table.tags"/>
+
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>agent</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+
+<para>Unique internal identifier of the operator or agent that assigned the tag to the mail. Generally NULL if the tag was automatically assigned by a filter rule or another automatic way. In the latter case, specific pseudo-users can also be set up as tagging agents if needed.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>date_insert</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+                <literal>DEFAULT now()</literal>
+<para>Date and time of the insertion.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+      </para>
+    </section>
+
+      <section id="table.mail-template"
+               xreflabel="mail_template">
+        <title id="table.mail-template-title">
+         Table:
+
+         <structname>mail_template</structname>
+        </title>
+
+<para>This table contains pre-created messages that can be used as models when composing
+a new mail or setting up a mailing. Templates may contain placeholders for variable text.
+</para>
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>mail_template</structname>
+            </title>
+
+
+            <varlistentry>
+              <term><structfield>template_id</structfield></term>
+              <listitem><para>
+                <type>serial</type>
+<para>Unique identifier of the template.</para>
+
+                <literal>PRIMARY KEY</literal>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>title</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>The title of the template.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>body_text</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>The plain text part of the template. It can be null if the format is HTML only.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>body_html</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>The HTML text part of the template. It can be null if the format is plain text only.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>header</structfield></term>
+              <listitem><para>
+                <type>text</type>
+<para>The header part of the template, not yet encoded for the mail transport. It may contain
+characters outside of the US-ASCII charset and unfolded long lines.
+Entries are separated by newlines. In a future version, the contents of this field may be added to the headers of an
+outgoing message that would have been generated from this template.</para>
+
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>creation_date</structfield></term>
+              <listitem><para>
+                <type>timestamp with time zone</type>
+<para>The date and time at which the template was created.</para>
+                <literal>DEFAULT now()</literal>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+
+
       <section id="table.mailing-data"
                xreflabel="mailing_data">
         <title id="table.mailing-data-title">
          Table:
-         
+
          <structname>mailing_data</structname>
         </title>
  <para>The data that corresponds to a mailing. For each mailing, there is one line per recipient, with
@@ -1709,7 +2020,7 @@ all the information necessary to generate and send the message to this recipient
                 <type>text</type>
 <para>This field generally contains one mail address, but it is also permitted to have
 several addreses separated by commas</para>
- 
+
               </para>
 
             </listitem>
@@ -1747,10 +2058,10 @@ several addreses separated by commas</para>
                xreflabel="mailing_definition">
         <title id="table.mailing-definition-title">
          Table:
-         
+
          <structname>mailing_definition</structname>
         </title>
- 
+
         <para>
           <variablelist>
             <title>
@@ -1884,10 +2195,10 @@ several addreses separated by commas</para>
                xreflabel="mailing_run">
         <title id="table.mailing-run-title">
          Table:
-         
+
          <structname>mailing_run</structname>
         </title>
- 
+
 
 
         <para>
@@ -1969,233 +2280,16 @@ several addreses separated by commas</para>
       </para>
     </section>
 
-      <section id="table.mail-status"
-               xreflabel="mail_status">
-        <title id="table.mail-status-title">
-         Table:
-         
-         <structname>mail_status</structname>
-        </title>
-<para> A table automatically managed by triggers, that contains references to mail messages which are not yet archived (incoming), or not yet sent (outgoing). This table is supposed to be always relatively small and cached by the database server, so this allows to speed up queries that deal with the small subset of messages that is actually current. That is especially true for databases containing very large sets of messages. </para>
-
-
-        <para>
-          <variablelist>
-            <title>
-              Structure of <structname>mail_status</structname>
-            </title>
-
-
-            <varlistentry>
-              <term><structfield>mail_id</structfield></term>
-              <listitem><para>
-                <type>integer</type>
-
-<para>Unique internal identifier of the message.</para>
-
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-            <varlistentry>
-              <term><structfield>status</structfield></term>
-              <listitem><para>
-                <type>integer</type>
-The same as <literal>mail.status</literal>, except that only the values that have their bits 8 (Sent) and 5 (Archived) cleared will be found here. 
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-        </variablelist>
-      </para>
-<para>Note: This table exists only for performance reasons and it's use is not encouraged except in the core of Manitou's application code. If possible, use the status field of the mail table instead.</para>
-
-<para>If parts or all of the contents of mail_status get accidentally deleted, they can be regenerated using the following SQL query:
-
-<literal>
-INSERT INTO mail_status(mail_id,status)
- SELECT mail_id,status FROM mail
-  WHERE status&amp;32=0 AND status&amp;256=0 
-    AND mail_id NOT IN (SELECT mail_id FROM mail_status)
-</literal>
-</para>
-    </section>
-
-      <section id="table.mail-tags"
-               xreflabel="mail_tags">
-        <title id="table.mail-tags-title">
-         Table:
-         
-         <structname>mail_tags</structname>
-        </title>
- 
-
-
-        <para>
-          <variablelist>
-            <title>
-              Structure of <structname>mail_tags</structname>
-            </title>
-
-<para>Contains the mapping between the mail messages and the tags assigned to them. </para>
-            <varlistentry>
-              <term><structfield>mail_id</structfield></term>
-              <listitem><para>
-                <type>integer</type>
-<para>Unique internal identifier of the message.</para>
-                <literal>REFERENCES</literal> <xref linkend="table.mail"/>
-
-
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-            <varlistentry>
-              <term><structfield>tag</structfield></term>
-              <listitem><para>
-                <type>integer</type>
-
-<para>Unique internal identifier of a tag.</para>
-                <literal>REFERENCES</literal> <xref linkend="table.tags"/>
-
-
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-            <varlistentry>
-              <term><structfield>agent</structfield></term>
-              <listitem><para>
-                <type>integer</type>
-
-<para>Unique internal identifier of the operator or agent that assigned the tag to the mail. Generally NULL if the tag was automatically assigned by a filter rule or another automatic way. In the latter case, specific pseudo-users can also be set up as tagging agents if needed.</para>
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-            <varlistentry>
-              <term><structfield>date_insert</structfield></term>
-              <listitem><para>
-                <type>timestamp with time zone</type>
-                <literal>DEFAULT now()</literal>
-<para>Date and time of the insertion.</para>
-
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-        </variablelist>
-      </para>
-    </section>
-
-      <section id="table.mail-template"
-               xreflabel="mail_template">
-        <title id="table.mail-template-title">
-         Table:
-         
-         <structname>mail_template</structname>
-        </title>
- 
-<para>This table contains pre-created messages that can be used as models when composing 
-a new mail or setting up a mailing. Templates may contain placeholders for variable text.
-</para>
-
-        <para>
-          <variablelist>
-            <title>
-              Structure of <structname>mail_template</structname>
-            </title>
-
-
-            <varlistentry>
-              <term><structfield>template_id</structfield></term>
-              <listitem><para>
-                <type>serial</type>
-<para>Unique identifier of the template.</para>
-
-                <literal>PRIMARY KEY</literal>
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-            <varlistentry>
-              <term><structfield>title</structfield></term>
-              <listitem><para>
-                <type>text</type>
-<para>The title of the template.</para>
-
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-            <varlistentry>
-              <term><structfield>body_text</structfield></term>
-              <listitem><para>
-                <type>text</type>
-<para>The plain text part of the template. It can be null if the format is HTML only.</para>
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-            <varlistentry>
-              <term><structfield>body_html</structfield></term>
-              <listitem><para>
-                <type>text</type>
-<para>The HTML text part of the template. It can be null if the format is plain text only.</para>
-
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-            <varlistentry>
-              <term><structfield>header</structfield></term>
-              <listitem><para>
-                <type>text</type>
-<para>The header part of the template, not yet encoded for the mail transport. It may contain
-characters outside of the US-ASCII charset and unfolded long lines.
-Entries are separated by newlines. In a future version, the contents of this field may be added to the headers of an
-outgoing message that would have been generated from this template.</para>
-
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-            <varlistentry>
-              <term><structfield>creation_date</structfield></term>
-              <listitem><para>
-                <type>timestamp with time zone</type>
-<para>The date and time at which the template was created.</para>
-                <literal>DEFAULT now()</literal>
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-        </variablelist>
-
-      </para>
-    </section>
 
 
       <section id="table.mime-types"
                xreflabel="mime_types">
         <title id="table.mime-types-title">
          Table:
-         
+
          <structname>mime_types</structname>
         </title>
- 
+
 
         <para>
           <variablelist>
@@ -2236,10 +2330,10 @@ outgoing message that would have been generated from this template.</para>
                xreflabel="non_indexable_words">
         <title id="table.non-indexable-words-title">
          Table:
-         
+
          <structname>non_indexable_words</structname>
         </title>
- 
+
 <para>Stopwords for the full text indexer. These are words that are excluded from the index.</para>
         <para>
           <variablelist>
@@ -2266,11 +2360,11 @@ outgoing message that would have been generated from this template.</para>
                xreflabel="notes">
         <title id="table.notes-title">
          Table:
-         
+
          <structname>notes</structname>
         </title>
 <para>Contains the private notes that can be attached to messages. "Private" in this context means that the notes are not exported to the outside by way of the mail transport system.
-</para> 
+</para>
 
 
         <para>
@@ -2325,7 +2419,7 @@ outgoing message that would have been generated from this template.</para>
                xreflabel="programs">
         <title id="table.programs-title">
          Table:
-         
+
          <structname>programs</structname>
         </title>
 <para> Contains the names or paths of the programs that can be executed to display attachments.</para>
@@ -2372,7 +2466,7 @@ Example: text/html, image/jpeg, ... </para>
       The configuration for which the entry apply. A null value will mean that the entry applies by default. If the user interface is running under a particular configuration and that configuration has an entry for the content_type, then that entry is taken instead of the default one.
       There are two basic reasons why programs can be specialized by configuration:
       1) On a multi-user installation, some users may not want to use the same programs to display attachments than others: they can do so by setting up their own configuration to override the default.
-      2) An individual user can run the user interface under several operating systems, with obviously different software installed on each OS. 
+      2) An individual user can run the user interface under several operating systems, with obviously different software installed on each OS.
 
 </para>
               </para>
@@ -2389,10 +2483,10 @@ Example: text/html, image/jpeg, ... </para>
                xreflabel="raw_mail">
         <title id="table.raw-mail-title">
          Table:
-         
+
          <structname>raw_mail</structname>
         </title>
- 
+
 <para>This table is filled only if the store_raw_mail entry is set to true in the manitou-mdx configuration file. When it is, each incoming message is inserted in its original form as a binary large object, in addition to the other tables, mail, header, ...</para>
 
         <para>
@@ -2434,7 +2528,7 @@ Example: text/html, image/jpeg, ... </para>
                xreflabel="runtime_info">
         <title id="table.runtime-info-title">
          Table:
-         
+
          <structname>runtime_info</structname>
         </title>
  <para>Contains (key, values) string pairs that contain runtime information about the mail-database exchanger (manitou-mdx). These information can be used to monitor the process activity (or lack thereof) from the outside. </para>
@@ -2535,10 +2629,10 @@ Example: text/html, image/jpeg, ... </para>
                xreflabel="tags">
         <title id="table.tags-title">
          Table:
-         
+
          <structname>tags</structname>
         </title>
- 
+
 <para>Contains the tags definitions.</para>
 
 
@@ -2619,10 +2713,10 @@ Example: text/html, image/jpeg, ... </para>
                xreflabel="tags_words">
         <title id="table.tags-words-title">
          Table:
-         
+
          <structname>tags_words</structname>
         </title>
- 
+
 <para>Contains the association between tags and words. Not used by default, by can be used for the bayesian auto-classification.</para>
 
         <para>
@@ -2678,10 +2772,10 @@ Example: text/html, image/jpeg, ... </para>
                xreflabel="user_queries">
         <title id="table.user-queries-title">
          Table:
-         
+
          <structname>user_queries</structname>
         </title>
- 
+
 <para>This table contains the user-defined queries that are runnable in the user interface.</para>
 
         <para>
@@ -2721,10 +2815,10 @@ Example: text/html, image/jpeg, ... </para>
                xreflabel="users">
         <title id="table.users-title">
          Table:
-         
+
          <structname>users</structname>
         </title>
- 
+
 	<para>The users of the database.</para>
         <para>
           <variablelist>
@@ -2812,10 +2906,10 @@ Example: text/html, image/jpeg, ... </para>
                xreflabel="words">
         <title id="table.words-title">
          Table:
-         
+
          <structname>words</structname>
         </title>
- 
+
         <para>
           <variablelist>
             <title>

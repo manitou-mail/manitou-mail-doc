@@ -1304,9 +1304,16 @@ The decoded contents of the entire header of the message. Lines are separated by
             <varlistentry>
               <term><structfield>job_type</structfield></term>
               <listitem><para>
-                <type>character varying(4)</type>
+                <type>character varying(100)</type>
+		<para>Supported job types:
+<itemizedlist>
+<listitem><literal>import_mailbox</literal>: import an entire mailbox (see <xref linkend="table.import-mbox"/>)</listitem>
+<listitem><literal>mailing</literal>: import an entire mailbox (see <xref linkend="table.mailing-run"/>)</listitem>
+<listitem><literal>send_mail</literal>: send an outgoing message (pointed to by <literal>mail_id</literal></listitem>) at a future time.
+<listitem> <literal>widx</literal>: index the mail contents pointed to by <literal>mail_id</literal></listitem>.
+</itemizedlist>
               </para>
-
+</para>
             </listitem>
           </varlistentry>
 

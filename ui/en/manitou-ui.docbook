@@ -900,7 +900,7 @@ selected in the attachments view.
 Filter rules get applied to messages upon sending or receiving.
 Each filter has a match condition and a list of ordered actions that are
 automatically applied server-side when the condition is met.
-Condition expressions yield a boolean result and are written much like in a programming language, with operators, function calls, the logical connectors AND,OR,NOT.
+Condition expressions yield a boolean result and are written much like in a programming language, with operators, function calls, the logical connectors AND, OR, NOT and parentheses.
 Typical actions consist of tagging the message, setting a priority, a
 status, redirecting or discarding it automatically.  </para>
 
@@ -915,6 +915,8 @@ The user interface has an editor for conditions and actions, launched by the <gu
 <caption><para>Filter rule editor</para></caption>
 </mediaobject>
 </screenshot>
+
+The <literal>Filter</literal> field at the top right can be used to display only the rules that contain a given substring, either in their name or in their expression.
 </para>
 
 <sect1 id="filters.expressions">
@@ -1240,13 +1242,13 @@ the sender of the reply.</para></listitem>
 
 
 <sect1 id="filters.examples">
-<title>Use cases examples</title>
+<title>Examples</title>
 <sect3>
 <title>High priority routing during non-business hours</title>
 <para>
-Consider alert e-mails sent by a Nagios monitoring system.  If they're
+Consider alert e-mails sent by a monitoring system.  If they're
 received outside of business hours, we want to transfer them to some
-other mail account, for example one that is routed to a mobile phone.
+other mail account, for example one that is meant to be read on mobile.
 </para>
 
 <literallayout>Condition name: alert
@@ -1285,11 +1287,11 @@ Actions: Remove header field Reply-To
 <para>
 The current day is the first day of the month: <literal>now("day")="01"</literal> or <literal>now("day")==1</literal> (with implicit conversion to numeric).
 <sbr/>
-The year is 2011: <literal>now("year")="2011"</literal>.
+The year is 2016: <literal>now("year")="2016"</literal>.
 <sbr/>
-The day is exactly the November 17, 2011: <literal>now("date")="2011-11-17"</literal>
+The day is exactly the November 17, 2016: <literal>now("date")="2016-11-16"</literal>
 <sbr/>
-The sender's date on the message is November 17, 2011: <literal>date("date")="2011-11-17"</literal>
+The sender's date on the message is November 17, 2016: <literal>date("date")="2016-11-16"</literal>
 </para>
 </sect3>
 

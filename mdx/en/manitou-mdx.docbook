@@ -123,13 +123,13 @@ preferred_datetime=sender
 In: [common] section only. 
 </para>
 <para>
-When this parameter is set, manitou-mdx will update the runtime_info table every 'alive_interval' seconds, with an entry containing the current timestamp (timestamp means the current date and time expressed as a number of seconds elapsed since Jan,1st 1970 UTC). The timestamp is put in the runtime_info.rt_value column of the row that matches rt_key='last_alive'. Its purpose is to be read by an external process to periodically check that manitou-mdx is alive and running.
+When this parameter is set, manitou-mdx will update <xref linkend="table.runtime-info" endterm="table.runtime-info-title"/> every <literal>alive_interval</literal> seconds, with an entry containing the current timestamp (timestamp means the current date and time expressed as a number of seconds elapsed since Jan,1st 1970 UTC). The timestamp is written into the <literal>runtime_info.rt_value</literal> column of the row that matches <literal>rt_key='last_alive'</literal>. Its purpose is to be read periodically by an external process to check that manitou-mdx is alive and running.
 </para>
 <para>
-Since it involves a write into the database, the value for 'alive_interval' should not be too small or the table will get rapidly bloated and performance degraded. For example any value below 60s is probably unnecessary small, while 600s looks reasonable.
+The value for <literal>alive_interval</literal> should not be too small or the table will get bloated and performance degraded. For example any value below 60 is probably unnecessary small, while 600 looks reasonable.
 </para>
 <para>
-The default is to leave it unset, meaning there is no update of the last_alive entry. A value of zero has the same meaning.
+The default is to leave it unset, meaning that there is no update to the <literal>last_alive</literal>  entry. A value of zero has the same meaning.
 </para>
 </sect3>
 

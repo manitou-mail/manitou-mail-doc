@@ -2601,7 +2601,7 @@ Example: text/html, image/jpeg, ... </para>
    <structfield>last_import</structfield>
 </entry>
 <entry>
-   <para>The last time a mail has been imported from the spool (MANITOU_MAILFILES_DIR). The format is an UTC timestamp.</para>
+   <para>The last time a mail has been imported from the spool. The format is an UTC timestamp.</para>
 </entry>
 </row>
 
@@ -2621,6 +2621,24 @@ Example: text/html, image/jpeg, ... </para>
 </entry>
 <entry>
    <para>The number of errors in importing mail files that occurred since that number was resetted to zero. Typically an administrator would look from time to time to mailfiles that caused errors and reset that counter once the cause of the error has been spotted and the incorrect file ignored or fixed and re-imported.</para>
+</entry>
+</row>
+
+<row>
+<entry>
+   <structfield>schema_version</structfield>
+</entry>
+<entry>
+   <para>The version of the database schema, formatted as <literal>MAJOR.MINOR.PATCH</literal>. <literal>manitou-mgr</literal> updates this value when it installs or upgrades the database schema. The schema version is normally the same as the version of <literal>manitou-mdx</literal> that runs with this database.</para>
+</entry>
+</row>
+
+<row>
+<entry>
+   <structfield>word_index_partsize</structfield>
+</entry>
+<entry>
+   <para>The size of a logical partition of <xref linkend="table.inverted-word-index"/>, as used for the <literal>part_no</literal> column of this table. This is not a PostgreSQL partition. The default value is <literal>16384</literal>. Changing this value requires rebuilding the full-text index with <command>manitou-mgr --reindex-full-text</command>.</para>
 </entry>
 </row>
 

@@ -494,9 +494,10 @@ postprocess_mailfile_cmd = /usr/manitou/bin/postprocess.sh $0 $1 $2
 <indexterm><primary>preferred_charset</primary></indexterm>
 <para>In: [common] or identities sections.</para>
 
-<para>The charset to which the bodies of outgoing mail should be
+<para>The encoding into which the bodies of outgoing mail should be
 converted before being set. Examples of values are utf-8, iso-8859-1,
 iso-8859-15, us-ascii...
+The value can also be a list of space-separated encodings, by order of preference.
 </para>
 <para>When left unset, manitou-mdx will try to find a suitable charset based on
 the database encoding and possibly the contents of the message to send.

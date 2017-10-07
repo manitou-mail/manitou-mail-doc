@@ -20,15 +20,29 @@ the program will display this dialog window:
 Fields left empty in this window get default values provided by
 the PostgreSQL client library:
 <itemizedlist>
-<listitem><para>Database name: login name of the current user (as logged to the operating system).</para></listitem>
-<listitem><para>Login: also the login name of the current user.</para></listitem>
-<listitem><para>Password: empty.</para></listitem>
-<listitem><para>Host: empty, which means connect locally to an Unix domain socket on Unix or MacOS, or <literal>localhost</literal> on MS-Windows.</para></listitem>
-<listitem><para>More parameters: empty.</para></listitem>
+<listitem>Database name: login name of the current user (as logged to the operating system).</listitem>
+<listitem>Login: also the login name of the current user.</listitem>
+<listitem>Password: empty.</listitem>
+<listitem>Host: empty, which means connect locally to an Unix domain socket on Unix or MacOS, or <literal>localhost</literal> on MS-Windows.</listitem>
+<listitem>More parameters: empty.</listitem>
 </itemizedlist>
 These defaults can themselves be overriden with some PostgreSQL-specific
 environment variables, such as PGHOST, PGUSER or PGPORT.
 </para>
+
+<para>
+<emphasis>Encrypted session</emphasis> is a tri-state checkbox interpreted as:
+<itemizedlist>
+<listitem>Not checked: do not encrypt the session with the database.</listitem>
+<listitem>Checked: encrypt the session, failing to connect if it is not possible.</listitem>
+<listitem>Partially checked: encrypt if possible, and fall back to no encryption otherwise.</listitem>
+</itemizedlist>
+
+These states correspond to the respective values for the <literal>sslmode</literal> connection
+parameter: <literal>disable</literal>, <literal>require</literal> and
+<literal>prefer</literal>.
+</para>
+
 
 <para>When the connection is successful, the parameters (except the
 password) are stored locally, and recalled automatically on the next
@@ -42,20 +56,20 @@ invocation, so that only the password has to be typed again.</para>
 The accepted options are:
 
 <itemizedlist>
-  <listitem><para>--dbcnx: a list of space-separated <code>name=value</code> parameters, all grouped in one string (under a shell, the string should be enclosed in simple
+  <listitem><para><literal>--dbcnx</literal>: a list of space-separated <code>name=value</code> parameters, all grouped in one string (under a shell, the string should be enclosed in simple
   or double quotes if it contains spaces).The more common parameters
   are <literal>user</literal>, <literal>password</literal>, <literal>host</literal>, <literal>port</literal>, and <literal>dbname</literal>.
 <informalexample>For example: <screen>manitou --dbcnx="dbname=mail user=joe host=pgserver"</screen></informalexample>
   </para></listitem>
 
 
-<listitem><para>--config: a configuration's name. This option is
+<listitem><para><literal>--config</literal>: a configuration's name. This option is
 necessary only to use different configurations on the same database
 from the same desktop machine. See
 the <link linkend="ui.configurations">user interface
 configurations</link> for more.</para></listitem>
 
-<listitem><para>--debug-output: an integer debug level between 1 and
+<listitem><para><literal>--debug-output</literal>: an integer debug level between 1 and
 10, that produces more or less verbose output on the terminal about
 what the application is doing. This is useful only for developers or
 troubleshooting.</para></listitem>

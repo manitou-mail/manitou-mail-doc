@@ -219,7 +219,7 @@ Options:
 
  <varlistentry>
   <term>--reindex-full-text</term>
-  <listitem>Rebuild the full text index, either entirely, for one partition, or for a range of partitions.</listitem>
+  <listitem>Rebuild the full text index, either entirely, for one partition, or for a range of partitions. When this command is used, the configuration setting <literal>index_words</literal> is ignored.</listitem>
 </varlistentry>
 
  <varlistentry>

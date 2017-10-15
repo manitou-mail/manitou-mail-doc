@@ -170,7 +170,7 @@ new addresses and comments, like in an address book.</para>
 
         <itemizedlist>
           <title>
-            Tables referencing mail_addresses via Foreign Key Constraints
+            Tables referencing addresses via Foreign Key Constraints
           </title>
 
           <listitem>
@@ -359,7 +359,7 @@ The use and syntax of content-ID is described in <ulink url="http://www.rfc-edit
 
         <itemizedlist>
           <title>
-            Tables referencing attachment_contents via Foreign Key Constraints
+            Tables referencing attachments via Foreign Key Constraints
           </title>
 
           <listitem>
@@ -735,7 +735,7 @@ The type of the action. Possible values are:
 
         <itemizedlist>
           <title>
-            Tables referencing filter_action via Foreign Key Constraints
+            Tables referencing filter_expr via Foreign Key Constraints
           </title>
 
           <listitem>
@@ -921,8 +921,6 @@ The decoded contents of the entire header of the message. Lines are separated by
          <structname>identities</structname>
         </title>
 
-
-
         <para>
           <variablelist>
             <title>
@@ -935,7 +933,7 @@ The decoded contents of the entire header of the message. Lines are separated by
               <listitem><para>
                 <type>text</type>
 
-                <literal>NOT NULL</literal>
+                <literal>UNIQUE NOT NULL</literal>
 <para>the email address that will appear in the From header field and enveloppe From of outgoing messages when this identity is choosen. </para>
 
               </para>
@@ -1485,7 +1483,7 @@ The RFC822 name part extracted from the "From" address. If there are several sen
 <listitem>7 (0x80): Set if the message is meant to be sent (and not cleared when it has actually been sent).</listitem>
 <listitem>8 (0x100): Set if the message has been sent (that is, successfully passed to the local delivery agent).</listitem>
 <listitem>9 (0x200): Set if a reply is currently being made by an operator. Not used in current versions.</listitem>
-<listitem>10 (0x400): Set if the message has been composed but not yet scheduled for sending. Not used in current versions.</listitem>
+<listitem>10 (0x400): Set if the message has been composed and scheduled for later sending.</listitem>
 </itemizedlist>
 </para>
 
@@ -1610,7 +1608,7 @@ then replied to, and thus marked as archived should have its status set to
 
         <itemizedlist>
           <title>
-            Tables referencing attachments via Foreign Key Constraints
+            Tables referencing mail via Foreign Key Constraints
           </title>
 
           <listitem>
@@ -1754,59 +1752,6 @@ then replied to, and thus marked as archived should have its status set to
       </para>
     </section>
 
-
-
-      <section id="table.mail-status"
-               xreflabel="mail_status">
-        <title id="table.mail-status-title">
-         Table: <structname>mail_status</structname>
-        </title>
-<para> A table automatically managed by triggers, that contains references to mail messages which are not yet archived (incoming), or not yet sent (outgoing). This table is supposed to be always relatively small and cached by the database server, so this allows to speed up queries that deal with the small subset of messages that is actually current. That is especially true for databases containing very large sets of messages. </para>
-
-
-        <para>
-          <variablelist>
-            <title>
-              Structure of <structname>mail_status</structname>
-            </title>
-
-
-            <varlistentry>
-              <term><structfield>mail_id</structfield></term>
-              <listitem><para>
-                <type>integer</type>
-
-<para>Unique internal identifier of the message.</para>
-
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-            <varlistentry>
-              <term><structfield>status</structfield></term>
-              <listitem><para>
-                <type>integer</type>
-The same as <literal>mail.status</literal>, except that only the values that have their bits 8 (Sent) and 5 (Archived) cleared will be found here.
-              </para>
-
-            </listitem>
-          </varlistentry>
-
-        </variablelist>
-      </para>
-<para>Note: This table exists only for performance reasons and it's use is not encouraged except in the core of Manitou's application code. If possible, use the status field of the mail table instead.</para>
-
-<para>If parts or all of the contents of mail_status get accidentally deleted, they can be regenerated using the following SQL query:
-
-<literal>
-INSERT INTO mail_status(mail_id,status)
- SELECT mail_id,status FROM mail
-  WHERE status&amp;32=0 AND status&amp;256=0
-    AND mail_id NOT IN (SELECT mail_id FROM mail_status)
-</literal>
-</para>
-    </section>
 
       <section id="table.mail-tags"
                xreflabel="mail_tags">
@@ -2176,7 +2121,7 @@ several addreses separated by commas</para>
         </variablelist>
         <itemizedlist>
           <title>
-            Tables referencing mailing_data via Foreign Key Constraints
+            Tables referencing mailing_definition via Foreign Key Constraints
           </title>
 
           <listitem>
@@ -2722,6 +2667,11 @@ Example: text/html, image/jpeg, ... </para>
           </listitem>
 
 
+          <listitem>
+            <para>
+              <xref linkend="table.tags-counters"/>
+            </para>
+          </listitem>
 
           <listitem>
             <para>
@@ -2733,6 +2683,57 @@ Example: text/html, image/jpeg, ... </para>
 
       </para>
     </section>
+
+      <section id="table.tags-counters"
+               xreflabel="tags_counters">
+        <title>Table: <structname>tags_counters</structname> </title>
+
+<para>Optional per-tag materialized counters for archived messages.</para>
+
+
+        <para>
+          <variablelist>
+            <title>
+              Structure of <structname>tags_counters</structname>
+            </title>
+
+            <varlistentry>
+              <term><structfield>tag_id</structfield></term>
+              <listitem><para>
+                <type>integer NOT NULL</type>
+<para>The unique internal ID of the tag</para>
+<literal>REFERENCES</literal> <xref linkend="table.tags"/>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>cnt</structfield></term>
+              <listitem><para>
+                <type>integer</type>
+<para>Partial count (a total count is obtained by adding all counts for a tag_id). May be negative to reflect untagging (only for entries with temp=false)</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+            <varlistentry>
+              <term><structfield>temp</structfield></term>
+              <listitem><para>
+                <type>boolean not null</type>
+<para>True if that entry is meant to be summed up and merged into the corresponding non-temporary per-tag entry.</para>
+              </para>
+
+            </listitem>
+          </varlistentry>
+
+        </variablelist>
+
+      </para>
+    </section>
+
+
 
       <section id="table.tags-words"
                xreflabel="tags_words">
@@ -2968,7 +2969,7 @@ Example: text/html, image/jpeg, ... </para>
 
         <itemizedlist>
           <title>
-            Tables referencing inverted_word_index via Foreign Key Constraints
+            Tables referencing words via Foreign Key Constraints
           </title>
 
           <listitem>

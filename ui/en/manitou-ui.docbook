@@ -226,7 +226,7 @@ th <guimenuitem>Display</guimenuitem>menu.</listitem>
 <title>The Quick selection panel</title>
 <para>
 This panel is laid out as a tree structure. Each leaf
-is internally associated to a query; when the user selects a tree item,
+is internally associated to a query; when a tree item gets selected,
 the associated query is run, and a new page is shown with the resulting list of messages.
 Each leaf is a <emphasis>selector</emphasis>.
 </para>
@@ -312,7 +312,10 @@ The positions and sizes of the columns are saved in the database in the current 
     <entry>The message has been sent</entry>
   </row>
   <row><entry><inlinemediaobject><imageobject><imagedata fileref="img/status_pending.png" /></imageobject></inlinemediaobject></entry>
-    <entry>The message is waiting to be sent (transient state)</entry>
+    <entry>The message will be sent as soon as possible (transient state)</entry>
+  </row>
+  <row><entry><inlinemediaobject><imageobject><imagedata fileref="img/status_scheduled.png" /></imageobject></inlinemediaobject></entry>
+    <entry>The message is scheduled to be sent later</entry>
   </row>
 </tbody>
 </tgroup>
@@ -326,7 +329,8 @@ The positions and sizes of the columns are saved in the database in the current 
 <title>Pages</title>
 <para>
 The interface displays lists of messages in pages between which the
-user can navigate with Move back and Move forward commands (bound to
+user can navigate with <guimenuitem>Move back</guimenuitem>
+and <guimenuitem>Move forward</guimenuitem> commands (bound to
 alt-left and alt-right keys), like in a web browser. When a new set of
 results is requested, a new page is opened, replacing the list of
 messages previously on screen. Other pages can be instantly displayed
@@ -334,21 +338,21 @@ back on screen by moving through pages, back and forward.
 </para>
 
 <para>
-These commands are meant to let the user navigate rapidly through lists of messages.
+These commands are meant to navigate rapidly through lists of messages.
 Example: a message currently on screen is
 from <literal>john.doe@example.org</literal>. The user right clicks
-on the subject line and choose the <literal>Last 10 messages from
+on the subject line and choose the <literal>Last messages from
 john.doe@example.org</literal> command.
 The program then opens a new page with the results.
 The user wades through the results, and when done, comes back to the
 previous page by issuing <guimenuitem>Move back</guimenuitem>.
 The display and selection will then be restored as they were before
-the Last 10 messages... command was issued.
+the Last messages from... command was issued.
 </para>
 
 <para>
 The number of pages that are kept in memory is a configuration
-parameter named <literal>msg_window_pages</literal> which defaults to
+parameter named <literal>msg_window_pages</literal>, which defaults to
 5. It means that when a new page is opened while there are already
 five result pages in memory, the older page (number 1) is removed from
 the memory to get room for the new one. The page number 2 becomes
@@ -364,8 +368,37 @@ browsers behavior.
 </para>
 </sect3>
 
-<sect3>
-<title>Windows</title>
+<sect3><title>Segments</title>
+<para>
+The amount of messages fetched and displayed together in a list must
+be limited to avoid overflowing the memory or being too slow to be
+loaded from the database.
+When the result of a selection contains more messages than the configurable
+limit, it gets split into segments, only one segment being present in the
+main list at a time.
+Commands available as <guimenuitem>Selection->Fetch previous segment</guimenuitem> and
+<guimenuitem>Selection->Fetch next segment</guimenuitem> populates the list
+with another segment, allowing to navigate through
+all segments of the same resultset, one segment at a time.
+
+These commands are also available as clickable items
+at the top and bottom of the list, when suitable.
+</para>
+<para>
+The size of the segments is defined by the <literal>Limit To</literal>
+numeric field in the Query selection dialog, along with the sort order
+(newest first or oldest first). In the first case, the first segment
+will contain the newest messages and the next ones older messages.
+In the other case, the first segment will have the older messages and
+navigating to the next ones will go from oldest to newest.
+Within the list on diplay, the sort order can be set dynamically
+ascending or descending by date (by clicking on the header), but the meaning
+of next and previous to load other segments always relates to the order specified
+in the Query Selection dialog.
+</para>
+</sect3>
+
+<sect3> <title>Windows</title>
 <para>
 A new window with an entirely new set of pages (initially blank) can
 be opened with the <guimenuitem>File->New window</guimenuitem>
@@ -542,6 +575,18 @@ Multiple conditions are implicitly joined with a logical AND.
      <entry>Find messages with attachments whose name ends with a dot followed by one of the indicated suffixes. The match against suffixes is case insensitive.</entry>
    </row>
 
+   <row>
+     <entry><literal>msgid</literal></entry>
+     <entry><literal>msgid:8cfb6e4ad@example.com</literal></entry>
+     <entry>Find messages from their <literal>Message-Id</literal> header, normally unique (but this unicity is not enforceable). Enclosing brackets (&lt;&gt;) are optional.</entry>
+   </row>
+
+   <row>
+     <entry><literal>id</literal></entry>
+     <entry><literal>id:10000</literal></entry>
+     <entry>Find a message from its internal <literal>mail_id</literal>, guaranteed to be unique within the database.</entry>
+   </row>
+
  </tbody>
 </tgroup>
 </table>
@@ -658,13 +703,13 @@ The <guimenuitem>Selection->New query</guimenuitem> command opens a non-modal di
 </screenshot>
 </para>
 
-<para> The user should fill in one or several fields with values
-against which the database contents will be tested. When OK is
-pressed, the program generates a query based on the non-empty fields
+<para> Fields may be set to values against which the database contents
+will be tested. On form validation, the program generates a query based on
+the non-empty fields
 (they're combined with a logical AND, therefore for a particular
-message to be retrieved, it has to match all the submitted
+message to be part of the results, it has to match all the submitted
 criteria). Then it runs the query and on completion, create a new page
-of results in the window from which the command has been
+of results in the window from which the query dialog has been
 called. </para>
 
 <sect1 id="search-fields">
@@ -724,10 +769,11 @@ will be ANDed with the other criteria.
 </sect3>
 
 <sect3><title>Contains tag</title>
-<para>The combobox lists all available tags. Selecting a tag
-will constrain the messages retrieved to those to which that tag is assigned.
+<para>An edit field for a tag name with dynamic auto-completion in a drop-down
+list.
+Selecting a tag contrains the results to messages to which that tag is assigned.
 The hierarchy of tags is flattened so that child tags are expressed
-as parent_tag->child_tag
+as <literal>parent_tag->child_tag</literal>
 </para>
 </sect3>
 
@@ -753,29 +799,36 @@ well.
 </sect3>
 
 <sect3><title>Limit To</title>
-<para>An integral number is expected in this field. It
-will limit the number of messages fetched from the database to this
-value, even if there are more messages that match the criteria
-entered.
+<para>An integer is expected in this field. It
+will limit the segment of messages first fetched from the database to this
+size, even if there are more messages that match the criteria.
+After the first fetch, more results can be obtained by navigating
+through the segments with the <guimenuitem>Fetch next segment</guimenuitem>
+and <guimenuitem>Fetch previous segments</guimenuitem> commands.
+Whether older or newer messages are retrieved first depends on the
+"Messages order" setting in the preferences (<xref linkend="ui.preferences.display" />).
+
 </para>
 <para>
-It is intended to avoid cluttering the network and/or
-your computer if the query hasn't been narrowed enough to retrieve a
+This limit is intended to avoid waiting too long for results or
+consuming too much memory if the query isn't narrowed enough to retrieve a
 reasonable number of messages. Several thousands of messages to fetch
-in one go is still reasonable, but millions of messages is not (it
-actually depends on the throughput of the link with the database and
-the power of the computer running manitou-mail user's interface, though).
+in one go is reasonable, but millions of messages is typically not (it
+actually depends on the throughput of the network link with the database and
+the capacity of the computer running Manitou-Mail user interface, though).
 </para>
 </sect3>
 
 <sect3><title>In trash</title>
-<para>Only messages that are trashed will be retrieved.</para>
+<para>When checked, only messages that have the
+status <literal>trashed</literal> will be retrieved. This is analoguous
+to searching in a trashcan folder.</para>
 </sect3>
 </sect1>
 
 <sect1 id="refining-queries">
 <title>Refining queries</title>
-<para>Sometimes a search has to be modified several times before
+<para>A search might have to be refined several times before
 giving satisfactory results. After results are shown, the
 <guimenuitem>Selection->Modify</guimenuitem> query command may be used
 to reopen the query selection dialog, with the criteria already set
@@ -793,18 +846,21 @@ the F5 key. Note that messages in the current list that no longer
 match the query are not removed from the list. </para>
 
 <para>
-Built-in selections "New->All" and "Current->All" can also be automatically and periodically refreshed based on the setting on a Preferences parameter (Check new mail every X minutes). When this parameter is set and new messages are available, an icon with a number of messages gets displayed in a button at the bottom right in the status bar and a message "New mail is availaible" is left at the bottom left.
+Built-in selections "New->All" and "Current->All" can also be automatically and periodically refreshed based on the <emphasis>"Automatically refresh results"</emphasis> and
+<emphasis>"Auto-incoporate new messages into lists"</emphasis>
+settings in the preferences (<xref linkend="ui.preferences.fetching" />).
+
 </para>
 
-<para>
-Clicking on the button will add the new messages to the current list (actually a refresh command will be issued, which should have the same effect except if you're in a multi-user environment and another user has already changed the messages so that they no longer match the "new" or "current" criteria).
-</para>
 </sect1>
 
 <sect1 id="search.save">
 <title>Saving search criteria</title>
 <para>
-When query definitions are saved, they appear in the "User queries" branch of the quick selection panel. Use the <guimenuitem>Selection->Save query</guimenuitem> command to save a query. The associated SQL sentence will be shown, and a query name will be asked for.
+When query definitions are saved, they appear in the <emphasis>"User queries"</emphasis>
+branch of the quick selection panel.
+Use the <guimenuitem>Selection->Save query</guimenuitem> command to save a query.
+The associated SQL sentence will be shown, and a query name will be asked for.
 </para>
 </sect1>
 </chapter>
@@ -855,7 +911,11 @@ to them, it will be run instead.
 <sect1 id="attachments.view.astext">
 <title>Viewing attachments as text</title>
 <para>
-Select one attachment and use the <guimenuitem>Message/Attachment/View as text</guimenuitem> command. It will open a non-modal window that shows the attachment contents as raw text. Attachments of type text/plain with a character set will be decoded to be displayed properly. 
+When an attachment is selected, the <guimenuitem>Message->Attachment->View as text</guimenuitem>
+command opens a non-modal window displaying the attachment contents as
+raw text. </para>
+<para>Attachments of type <literal>text/plain</literal> with a
+specific character declared set are decoded according to the declaration.
 </para>
 </sect1>
 
@@ -1225,20 +1285,19 @@ To remove the currently selected action, use the Del key.
 <listitem><para><emphasis role="bold">Set status</emphasis>: the argument is a combination of letters: 'R' for read,'A' for archive, all separated by + signs.</para>
 </listitem>
 
-<listitem><para><emphasis role="bold">Remove header</emphasis>: discard the specified header field. If the field is present multiple times, all its occurrences will be removed.</para>
+<listitem><para><emphasis role="bold">Set priority</emphasis>: assign a priority to the matching messages, either as an increment, with the <userinput>+=X</userinput> syntax or as an absolute value, with the <userinput>=X</userinput> syntax. The priority is an integer number ranging from -32768 to +32767.</para></listitem>
+
+<listitem><para><emphasis role="bold">Redirect</emphasis>: the argument is an email address to which the matching message is immediately resent.</para></listitem>
+
+<listitem><para><emphasis role="bold">Stop filters</emphasis>: this is a control-action that instructs the filtering the system that it shouldn't evaluate any more filter rule for the current message.</para>
 </listitem>
 
 <listitem><para><emphasis role="bold">Set header</emphasis>: set a header field. If the field is already present, the new value will replace the old one in all occurrences of the field, otherwise the field will be added.</para>
 </listitem>
 
-<listitem><para><emphasis role="bold">Set priority</emphasis>: assign a priority to the matching messages, either as an increment, with the <userinput>+=X</userinput> syntax or as an absolute value, with the <userinput>=X</userinput> syntax. The priority is an integer number ranging from -32768 to +32767.</para></listitem>
-
-<listitem><para><emphasis role="bold">Redirect</emphasis>: the argument is an email address to which the matching message is immediately resent.</para></listitem>
-
-<listitem><para><emphasis role="bold">Delete</emphasis>: discard the message or put it into the trashcan. The latter is equivalent to having the <literal>trashed</literal> status.</para></listitem>
-
-<listitem><para><emphasis role="bold">Stop filters</emphasis>: this is a control-action that instructs the filtering the system that it shouldn't evaluate any more filter rule for the current message.</para>
+<listitem><para><emphasis role="bold">Remove header</emphasis>: discard the specified header field. If the field is present multiple times, all its occurrences will be removed.</para>
 </listitem>
+
 
 <listitem><para><emphasis role="bold">Set identity</emphasis>: assign a different identity to the
 message.
@@ -1250,7 +1309,11 @@ practical use is that when replying to an incoming message with an
 updated identity, the new identity will automatically be pre-selected as
 the sender of the reply.</para></listitem>
 
+<listitem><para><emphasis role="bold">Discard</emphasis>: discard the message or put it into the trashcan. The latter is equivalent to having the <literal>trashed</literal> status.</para></listitem>
+
+
 </itemizedlist>
+
 </para>
 </sect1>
 
@@ -1338,17 +1401,16 @@ being set when the corresponding tag is assigned to the message
 currently selected.</para>
 </listitem>
 
-<listitem>Show headers:
-<para>The default value for the Display/Headers menu
-entry.  "None" means not to display any message header at all, "Most"
-means the most useful (From, To, Cc, Date...), and "All" means the full headers
-text.
-</para>
-</listitem>
-
 <listitem>Display sender as: 
 <para>Tells what should displayed in the "From" column
 of message lists: either the name of the sender (when known), or the email address.
+</para>
+</listitem>
+
+<listitem>Clickable URLs in body
+<para> when set to Yes, URLs in the body
+panel appear as clickable links. The browser may need to be configured
+in the Paths sections.
 </para>
 </listitem>
 
@@ -1362,12 +1424,6 @@ Text is the most secure choice.</para>
 <para>When all messages of a list have the <literal>Sent</literal> status, the Sender column is automatically switched to a Recipient column when this option is set to Yes. The column is switched back automatically to Sender when the list contents change, or manually with the context menu of the columns headers.</para>
 </listitem>
 
-<listitem>Clickable URLs in body
-<para> when set to Yes, URLs in the body
-panel appear as clickable links. The browser may need to be configured
-in the Paths sections.
-</para>
-</listitem>
 
 <listitem>Threaded display: 
 <para>The default value for the Display/Threaded menu
@@ -1380,14 +1436,6 @@ in tree-like representation, and the threads can be opened and closed.
 <para>How the dates are displayed in the message
 lists.  Choose DD/MM/YYYY HH:MI or YYYY/MM/DD HH:MI depending on what you
 find the more easy to read.
-</para>
-</listitem>
-
-<listitem>N in 'last N messages'
-<para>The contextual popup menu of a
-message on display has a command fetching the last messages of the
-same sender than the mail currently shown. This setting tells how
-much of these messages this command should retrieve in one go.
 </para>
 </listitem>
 
@@ -1497,9 +1545,13 @@ http://www.dairiki.org/xface</ulink>
 <sect1 id="ui.preferences.mimeviewers">
 <title>MIME viewers</title>
 <para>The list of programs that should be used to view attachments, each
-corresponding to a MIME type (a MIME type is a string like
-'image/jpeg', 'application/x-tar' that defines the type of data
-contained in an attached file).
+corresponding to a MIME type. MIME types are two-component strings like
+<literal>image/jpeg</literal> or <literal>application/x-tar</literal>' declaring
+the type of data contained in an attached file.
+</para>
+<para>The viewer command is taken as the name of a program. To launch
+a viewer, the interface downloads the attachment into a temporary file on disk,
+passing its path as the argument of the command.
 </para>
 </sect1>
 
@@ -1534,6 +1586,12 @@ mailer daemon.
 
 </para>
 </listitem>
+
+<listitem>External editor:
+<para>Composing a new message or a reply can happen outside of the user interface, in an external editor. This setting indicates the name of that program, optionally including a path. The program will received as an argument the path of a temporary file containing the current message contents.
+</para>
+</listitem>
+
 </itemizedlist>
 </sect1>
 
@@ -1606,6 +1664,16 @@ program used to open 'text/html' attachments.
 <para>Options about database fetch.</para>
 
 <itemizedlist>
+
+<listitem>Initial fetch:
+<para>
+This is the default limit for the initial segment fetched by a query
+retrieving a list of messages.
+This number can be changed on a per-case basis in the <emphasis>Limit</emphasis>
+field of the <emphasis>Query Selection</emphasis> dialog.
+</para>
+</listitem>
+
 <listitem>Max fetch ahead:
 <para> when a list of messages is displayed,
 the program can pre-fetch to memory the bodies of messages not
@@ -1615,10 +1683,10 @@ connected remotely through a slow network link.
 </para>
 </listitem>
 
-<listitem>Max database connexions:
+<listitem>Max database connections:
 <para> the program may use more than
-one connexion to perform simultaneous tasks. This number is
-the maximum number of such connexions.
+one connection to perform simultaneous tasks. This number is
+the maximum number of such connections.
 </para>
 </listitem>
 

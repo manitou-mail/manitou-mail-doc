@@ -666,7 +666,21 @@ tags to messages that come from this list.
 The tags panel should be open (using the <guimenuitem>Display->Tags</guimenuitem>
 command if necessary). At the bottom left of the window is a tree-like
 tags structure with checkboxes. Selected tags appear checked and
-in orange/red color, as shown in the pictures below:
+in orange color, as shown in the pictures below:
+</para>
+
+<screenshot>
+<mediaobject>
+<imageobject><imagedata fileref="img/assigned-tags.png" align="center" /></imageobject>
+<caption><para>Assigned tags</para></caption>
+</mediaobject>
+</screenshot>
+
+<para>
+The orange color on a tag without a checkbox indicates that a child
+of this tag is assigned to the current message, rather than the parent
+itself. Parent and child tags at any level of the
+tags hierarchy can be independantly assigned to messages.
 </para>
 </sect1>
 

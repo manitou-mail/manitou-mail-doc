@@ -124,11 +124,12 @@ just like the database itself. A database owner has all the rights on the databa
 <sect1 id="users.model">
 <title>The users and groups model</title>
 <para>
-Permissions on the mail database are given to groups, as opposed to directly to individual users.
-Individual user accounts are granted permissions through their group membership.
-Both users and groups entered in Manitou-Mail are mapped to PostgreSQL roles.
-Database roles representing users are members or other database roles
-representing groups.
+Permissions on the mail database are given to groups, as opposed to individual users
+directly. Database roles representing users must be members of roles representing groups
+(in PostgreSQL, the concept of <emphasis>role</emphasis> encompasses
+user accounts, groups of users, and sets of permissions).
+Both users and groups used in Manitou-Mail are mapped to PostgreSQL roles.
+
 </para>
 
 <para>
@@ -148,7 +149,7 @@ The actions controlled by the permission system are:
 <sect1 id="users.create-group">
 <title>Creating a group</title>
 <para>Group creation is accessible through the "Groups" tab in the "Database users"
-window being dispalyed by the <guimenuitem>File->Manage users</guimenuitem> command.
+window being displayed by the <guimenuitem>File->Manage users</guimenuitem> command.
 </para>
 
 <screenshot>

@@ -137,8 +137,8 @@ The actions controlled by the permission system are:
 <itemizedlist>
   <listitem>Read messages: the minimum permission.</listitem>
   <listitem>Modify messages: changing the status of messages.</listitem>
-  <listitem>Trash messages: moving messages to the trashcan.</listitem>
-  <listitem>Delete messages: physically deleting messages.</listitem>
+  <listitem>Trash messages: moving messages to the trashcan (can be undone).</listitem>
+  <listitem>Delete messages: physically deleting messages (cannot be undone).</listitem>
   <listitem>Write new messages: use <guimenuitem>Message->New</guimenuitem> to compose.</listitem>
   <listitem>Define tags and filters.</listitem>
 </itemizedlist>

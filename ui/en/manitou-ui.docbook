@@ -502,15 +502,33 @@ Multiple conditions are implicitly joined with a logical AND.
    </row>
 
    <row>
+     <entry><literal>-from</literal></entry>
+     <entry><literal>-from:name@example.com</literal></entry>
+     <entry>Exclude messages with a specific email address in their <literal>From</literal> header.</entry>
+   </row>
+
+   <row>
      <entry><literal>to</literal></entry>
      <entry><literal>to:name@example.com</literal></entry>
      <entry>Find messages with a specific email address in their <literal>To</literal> header.</entry>
    </row>
 
    <row>
+     <entry><literal>-to</literal></entry>
+     <entry><literal>-to:name@example.com</literal></entry>
+     <entry>Exclude messages with a specific email address in their <literal>To</literal> header.</entry>
+   </row>
+
+   <row>
      <entry><literal>cc</literal></entry>
      <entry><literal>cc:name@example.com</literal></entry>
      <entry>Find messages with a specific email address in their <literal>Cc</literal> header.</entry>
+   </row>
+
+   <row>
+     <entry><literal>-cc</literal></entry>
+     <entry><literal>-cc:name@example.com</literal></entry>
+     <entry>Exclude messages with a specific email address in their <literal>Cc</literal> header.</entry>
    </row>
 
    <row>

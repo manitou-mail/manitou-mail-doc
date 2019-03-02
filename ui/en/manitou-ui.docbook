@@ -573,37 +573,64 @@ Multiple conditions are implicitly joined with a logical AND.
    <row>
      <entry><literal>isnot</literal> (status)</entry>
      <entry><literal>isnot:archived</literal></entry>
-     <entry>It stands for the exact opposite of <literal>is</literal> and accepts the same arguments.</entry>
+     <entry>It stands for the exact opposite of <literal>is</literal>
+     and accepts the same arguments.</entry>
    </row>
 
    <row>
      <entry><literal>tag</literal></entry>
-     <entry><literal><para>tag:simplename</para><para>tag:"name of tag"</para><para>tag:parent->child</para></literal></entry>
-     <entry>Find messages to which a specific tag is assigned. Double quotes may be used to enclose a tag name containing separators. Any double quote in the name itself should be escaped by a preceding backslash. The hierarchy separator for tags is the sequence of two characters <literal>-&gt;</literal> (minus sign followed by right angle bracket). If that sequence happens to exist as an integral part of a name inside the hierarchy (not recommended), it should be backslash-escaped in the tag. For instance, <literal>tag:"ab-\&gt;cd"</literal> refers to a tag named <literal>ab-&gt;cd</literal>, with only one level of hierarchy.</entry>
+     <entry><literal>
+	 <para>tag:simplename</para>
+	 <para>tag:"name of tag"</para>
+	 <para>tag:parent->child</para>
+	 <para>tag:""</para>
+       </literal></entry>
+     <entry>Find messages to which a specific tag is assigned. Double
+     quotes may be used to enclose a tag name containing
+     separators. Any double quote in the name itself should be escaped
+     by a preceding backslash. The hierarchy separator for tags is the
+     sequence of two characters <literal>-&gt;</literal> (minus sign
+     followed by right angle bracket). If that sequence happens to
+     exist as an integral part of a name inside the hierarchy (not
+     recommended), it should be backslash-escaped in the tag. For
+     instance, <literal>tag:"ab-\&gt;cd"</literal> refers to a tag
+     named <literal>ab-&gt;cd</literal>, with only one level of
+     hierarchy.
+     <para>An empty string (<literal>tag:""</literal>) selects
+     messages that have no tag assigned.</para>
+     </entry>
    </row>
 
    <row>
      <entry><literal>filename</literal></entry>
      <entry><literal>filename:report</literal></entry>
-     <entry>Find messages with attachments whose name contains the indicated string. The match is case insensitive.</entry>
+     <entry>Find messages with attachments whose name contains the
+     indicated string. The match is case insensitive.</entry>
    </row>
 
    <row>
      <entry><literal>filesuffix</literal></entry>
      <entry><literal>filesuffix:doc/docx/pdf</literal></entry>
-     <entry>Find messages with attachments whose name ends with a dot followed by one of the indicated suffixes. The match against suffixes is case insensitive.</entry>
+     <entry>Find messages with attachments whose name ends with a dot
+     followed by one of the indicated suffixes. The match against
+     suffixes is case insensitive.</entry>
    </row>
 
    <row>
      <entry><literal>msgid</literal></entry>
      <entry><literal>msgid:8cfb6e4ad@example.com</literal></entry>
-     <entry>Find messages from their <literal>Message-Id</literal> header, normally unique (but this unicity is not enforceable). Enclosing brackets (&lt;&gt;) are optional.</entry>
+     <entry>Find messages from their <literal>Message-Id</literal>
+     header, normally unique (but this unicity is not enforceable,
+     since these identifiers are generated externally). Enclosing
+     brackets (&lt;&gt;) are optional.</entry>
    </row>
 
    <row>
      <entry><literal>id</literal></entry>
      <entry><literal>id:10000</literal></entry>
-     <entry>Find a message from its internal <literal>mail_id</literal>, guaranteed to be unique within the database.</entry>
+     <entry>Find a message from its
+     internal <literal>mail_id</literal>, guaranteed to be unique
+     within the database.</entry>
    </row>
 
  </tbody>

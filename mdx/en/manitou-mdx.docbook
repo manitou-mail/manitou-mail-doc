@@ -71,9 +71,10 @@ To import a mailbox into the database, use:
 <sect1 id="mdx.config">
 <title>Configuration file</title>
 
-<sect2><title>Location</title></sect2>
+<sect2><title>Location</title>
 By default, the configuration file is located at <filename>/etc/manitou-mdx.conf</filename>.
 Both manitou-mgr and manitou-mdx accept the <literal>--conf</literal> option to specify an alternative file.
+</sect2>
 
 <sect2 id="mdx.config.struct">
 <title>Structure</title>

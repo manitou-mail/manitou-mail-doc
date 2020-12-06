@@ -1,5 +1,6 @@
 XSLT_OPT = -stringparam use.id.as.filename "yes" \
-	-stringparam chunk.quietly "1"
+	-stringparam chunk.quietly "1" \
+	-stringparam toc.section.depth "2"
 WEB = web
 STYLESHEETS = /usr/share/xml/docbook/stylesheet
 MAINBOOK = book-mdx.docbook

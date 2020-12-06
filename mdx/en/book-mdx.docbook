@@ -284,5 +284,5 @@ postgres$ pg_dump -Fc -d manitou -U manitou >mail.dump
 </sect1>
 </chapter> <!-- administration -->
 
-<index />
+<index id="doc-index" />
  </book>
